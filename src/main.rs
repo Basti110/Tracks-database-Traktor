@@ -85,14 +85,32 @@ fn get_file_name(file: Result<DirEntry, Error>) -> io::Result<String> {
 }
 
 fn get_author_name(file_name: &String) -> io::Result<String> {
-    let pos = file_name.get_pos('-')?;
-    let author = file_name.substring(0, pos);
-    Ok(author)
+    //let pos = file_name.get_pos('-')?;
+    //let author = file_name.substring(0, pos);
+    let pos = match file_name.find(" - ") {
+        Some(x) => x,
+        None => return Err(Error::new(ErrorKind::InvalidData, "Can not find char in String")),
+    };
+    let slice;
+    unsafe {
+        slice = file_name.get_unchecked(0..pos);
+    }
+    Ok(slice.to_string())
+}
+
+fn get_version_name(file_name: &String) -> io::Result<String> {
+    let pos = match file_name.rfind(").") {
+        Some(x) => x,
+        None => return Err(Error::new(ErrorKind::InvalidData, "Can not find \").\"")),
+    };
+    Ok("".to_string())
 }
 
 trait StringUtils {
     fn substring(&self, start: usize, len: usize) -> Self;
     fn get_pos(&self, character: char) -> io::Result<usize>;
+    fn find_result(&self, pat: &str) -> io::Result<usize>;
+    fn rfind_result(&self, pat: &str) -> io::Result<usize>;
 }
 
 impl StringUtils for String {
@@ -103,7 +121,23 @@ impl StringUtils for String {
     fn get_pos(&self, character: char) -> io::Result<usize> {
         match self.chars().position(|c| c == character) {
             Some(x) => Ok(x),
-            None => Err(Error::new(ErrorKind::InvalidData, "Can not find char in String")),
+            None => Err(Error::new(ErrorKind::InvalidData, format!("Can not find {} in {}", character, self))),
         }
+    }
+
+    fn find_result(&self, pat: &str) -> io::Result<usize> {
+        let pos = match self.find(pat) {
+            Some(x) => x,
+            None => return Err(Error::new(ErrorKind::InvalidData, format!("Can not find {} in {}", pat, self))),
+        };
+        Ok(pos)
+    }
+
+    fn rfind_result(&self, pat: &str) -> io::Result<usize> {
+        let pos = match self.rfind(pat) {
+            Some(x) => x,
+            None => return Err(Error::new(ErrorKind::InvalidData, format!("Can not find {} in {}", pat, self))),
+        };
+        Ok(pos)
     }
 }
