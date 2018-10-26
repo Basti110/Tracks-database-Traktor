@@ -57,8 +57,10 @@ fn check_files(path: &str) -> io::Result<()> {
             let file_name = get_file_name(file)?;
             if file_name.len() > MAX_FILE_NAME_LEN {
                 let author = get_author_name(&file_name)?;
+                let version = get_version_name(&file_name)?;
                 println!("Name: {}", author);
                 println!("Name: {}", file_name);
+                println!("Name: {}", version);
                 count += 1;
             }
         }
@@ -99,11 +101,36 @@ fn get_author_name(file_name: &String) -> io::Result<String> {
 }
 
 fn get_version_name(file_name: &String) -> io::Result<String> {
-    let pos = match file_name.rfind(").") {
-        Some(x) => x,
-        None => return Err(Error::new(ErrorKind::InvalidData, "Can not find \").\"")),
-    };
-    Ok("".to_string())
+    let mut pos = file_name.rfind_result(").")?;
+    let mut slice;
+    let mut count = 1;
+    loop {
+        unsafe {
+            slice = file_name.get_unchecked(0..pos);
+        } 
+        println!("Name: {}", slice);
+        let pos1 = match slice.rfind(")") {
+            Some(x) => x,
+            None => 0,
+        };
+        let pos2 = slice.to_string().rfind_result("(")?;
+        println!("pos1: {} pos2: {}", pos1, pos2);
+        if pos1 > pos2 {
+            count += 1;
+            pos = pos1
+        }
+        else {
+            count -= 1;
+            pos = pos2;
+        }
+        if count == 0 {
+            break;
+        }
+    }
+    unsafe {
+        slice = file_name.get_unchecked(0..pos);
+    } 
+    Ok(slice.to_string())
 }
 
 trait StringUtils {
