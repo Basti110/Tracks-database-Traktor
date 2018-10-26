@@ -56,11 +56,8 @@ fn check_files(path: &str) -> io::Result<()> {
         for file in files {
             let file_name = get_file_name(file)?;
             if file_name.len() > MAX_FILE_NAME_LEN {
-                let author = get_author_name(&file_name)?;
-                let version = get_version_name(&file_name)?;
-                println!("Name: {}", author);
+                get_name_parts(&file_name)?;
                 println!("Name: {}", file_name);
-                println!("Name: {}", version);
                 count += 1;
             }
         }
@@ -86,21 +83,41 @@ fn get_file_name(file: Result<DirEntry, Error>) -> io::Result<String> {
     Ok(file_name.to_string())
 }
 
-fn get_author_name(file_name: &String) -> io::Result<String> {
+fn get_name_parts(file_name: &String) -> io::Result<()> {
+    let author_pos = get_author_name_pos(file_name)?;
+    let version_pos = get_version_name_pos(file_name)?;
+    let author;
+    let title;
+    let mut version;
+    let mut offset = " - ".len();
+    unsafe {
+        author = file_name.get_unchecked(0..author_pos);
+        title = file_name.get_unchecked(author_pos + offset..version_pos);
+        version = file_name.get_unchecked(version_pos..file_name.len());
+    }
+    let extension_pos = version.to_string().rfind_result(").")?;
+    offset = ")".len();
+    unsafe {
+        version = version.get_unchecked(0..extension_pos + offset);
+    }
+    println!("author: {}", author);
+    println!("title: {}", title);
+    println!("version: {}", version);
+
+    Ok(())
+}
+
+fn get_author_name_pos(file_name: &String) -> io::Result<usize> {
     //let pos = file_name.get_pos('-')?;
     //let author = file_name.substring(0, pos);
     let pos = match file_name.find(" - ") {
         Some(x) => x,
         None => return Err(Error::new(ErrorKind::InvalidData, "Can not find char in String")),
     };
-    let slice;
-    unsafe {
-        slice = file_name.get_unchecked(0..pos);
-    }
-    Ok(slice.to_string())
+    Ok(pos)
 }
 
-fn get_version_name(file_name: &String) -> io::Result<String> {
+fn get_version_name_pos(file_name: &String) -> io::Result<usize> {
     let mut pos = file_name.rfind_result(").")?;
     let mut slice;
     let mut count = 1;
@@ -108,13 +125,13 @@ fn get_version_name(file_name: &String) -> io::Result<String> {
         unsafe {
             slice = file_name.get_unchecked(0..pos);
         } 
-        println!("Name: {}", slice);
+        //println!("Name: {}", slice);
         let pos1 = match slice.rfind(")") {
             Some(x) => x,
             None => 0,
         };
         let pos2 = slice.to_string().rfind_result("(")?;
-        println!("pos1: {} pos2: {}", pos1, pos2);
+        //println!("pos1: {} pos2: {}", pos1, pos2);
         if pos1 > pos2 {
             count += 1;
             pos = pos1
@@ -127,10 +144,7 @@ fn get_version_name(file_name: &String) -> io::Result<String> {
             break;
         }
     }
-    unsafe {
-        slice = file_name.get_unchecked(0..pos);
-    } 
-    Ok(slice.to_string())
+    Ok(pos)
 }
 
 trait StringUtils {
