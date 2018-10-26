@@ -346,7 +346,7 @@
 ** v_PSB - AMCGA (6115 B1).wav
 :PROPERTIES:
 :Author:    Pet Shop Boys
-:Title:     A Man Could Get Arrested
+:Title:     A Man Could Get Arreste
 :Year:      1984
 :Release:   12 R 6165
 :END:

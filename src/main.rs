@@ -4,7 +4,7 @@ use std::io::{Error, ErrorKind, BufReader};
 use std::fs;
 use std::fs::{File, DirEntry};
 use std::path::Path;
-
+mod org_parser;
 const GENERATE_DATA: bool = false;
 const TRACK_LIST_PATH: &str = "src/files/tracks-sample.txt";
 const FILE_DIR: &str = "files/";
@@ -14,7 +14,18 @@ fn main() -> io::Result<()> {
     if GENERATE_DATA {
         write_files_from_list()?;
     }
-    check_files(FILE_DIR)?;
+    //check_files(FILE_DIR)?;
+    let mut entry = org_parser::OrgEntry::new(); 
+    entry.name = "test".to_string();
+    entry.author = "autor 1".to_string();
+    let mut entry_list = org_parser::OrgList::new();  
+    entry_list.add(entry);
+    {
+        let entry2 = entry_list.find_entry("test".to_string()).unwrap();
+        entry2.author = "lol".to_string();
+    }
+    let entry3 = entry_list.find_entry("test".to_string());
+    println!("{}", entry3.unwrap().author);
     Ok(())
 }
 
