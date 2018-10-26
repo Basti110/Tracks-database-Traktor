@@ -1,0 +1,708 @@
+* Vinyl to wave
+:PROPERTIES:
+:COLUMNS:  %4Year %12Author %20Title %20Version %10Release %ITEM
+:END:      
+
+** v_Julius Papp - Salvation.wav
+:PROPERTIES:
+:Author:    Julius Papp
+:Title:     Salvation
+:Year:      2003
+:Release:   Salvation EP
+:END:
+** v_OnePhatDeeva - Bad Habit (Club Mix).wav
+:PROPERTIES:
+:Author:    OnePhatDeeva
+:Author+:   Feat. Lisa Millet
+:Title:     Bad Habit
+:Version:   A.T.F.C. Club Mix
+:Year:      2000
+:Release:   Defected
+:END:
+** v_OnePhatDeeva - Bad Habit (Gimmick Mix).wav
+:PROPERTIES:
+:Author:    OnePhatDeeva
+:Author+:   Feat. Lisa Millet
+:Title:     Bad Habit
+:Version:   Armin Van Buuren Gimmick Club Mix
+:Year:      2000
+:Release:   Defected
+:END:
+** v_OnePhatDeeva - Bad Habit (Gimmick Dub).wav
+:PROPERTIES:
+:Author:    OnePhatDeeva
+:Author+:   Feat. Lisa Millet
+:Title:     Bad Habit
+:Version:   Armin Van Buuren Gimmick Dub
+:Year:      2000
+:Release:   Defected
+:END:
+** v_OnePhatDeeva - Bad Habit (Rising Star Mix).wav
+:PROPERTIES:
+:Author:    OnePhatDeeva
+:Author+:   Feat. Lisa Millet
+:Title:     Bad Habit
+:Version:   Armin Van Buuren Rising Star Mix
+:Year:      2000
+:Release:   Defected
+:END:
+** v_Sub.Merge - Take Me By The Hand (Vocal).wav
+:PROPERTIES:
+:Author:    Sub.Merge
+:Author+:   Feat. Jan Johnston
+:Title:     Take Me By The Hand
+:Version:   Vocal
+:Year:      1996
+:Release:   AM:PM
+:END:
+** v_Sub.Merge - Take Me By The Hand (Deep Mix).wav
+:PROPERTIES:
+:Author:    Sub.Merge
+:Author+:   Feat. Jan Johnston
+:Title:     Take Me By The Hand
+:Version:   Deep Mix
+:Year:      1996
+:Release:   AM:PM
+:END:
+** v_Sub.Merge - Take Me By The Hand (Dub).wav
+:PROPERTIES:
+:Author:    Sub.Merge
+:Author+:   Feat. Jan Johnston
+:Title:     Take Me By The Hand
+:Version:   I'll Come With You Dub
+:Year:      1996
+:Release:   AM:PM
+:END:
+** v_Sub.Merge - Take Me By The Hand (Instrumental).wav
+:PROPERTIES:
+:Author:    Sub.Merge
+:Author+:   Feat. Jan Johnston
+:Title:     Take Me By The Hand
+:Version:   Instrumental
+:Year:      1996
+:Release:   AM:PM
+:END:
+** v_Sandy B vs Coco.wav
+:PROPERTIES:
+:Author:    Sandy B vs. Coco
+:Year:      1996
+:Release:   1-sided Promo
+:Notes:     Make The World Go Round + I Need A Miracle
+:END:
+** v_Livin' Large - Anytime, Anywhere (Piano Mix).wav
+:PROPERTIES:
+:Author:    Livin' Large
+:Title:     Anytime, Anywhere
+:Version:   Piano Pressure Mix
+:Year:      1994
+:Release:   NNR013
+:END:
+** v_Livin' Large - Anytime, Anywhere (Kiss Edit).wav
+:PROPERTIES:
+:Author:    Livin' Large
+:Title:     Anytime, Anywhere
+:Version:   Kiss Edit
+:Year:      1994
+:Release:   NNR013
+:END:
+** v_Livin' Large - Anytime, Anywhere (Vibes Mix).wav
+:PROPERTIES:
+:Author:    Livin' Large
+:Title:     Anytime, Anywhere
+:Version:   Pure Wicked Vibes Mix
+:Year:      1994
+:Release:   NNR013
+:END:
+** v_Livin' Large - Anytime, Anywhere (Dub).wav
+:PROPERTIES:
+:Author:    Livin' Large
+:Title:     Anytime, Anywhere
+:Version:   Deeper Dub Trip
+:Year:      1994
+:Release:   NNR013
+:END:
+** v_Artful Dodger - Moving Too Fast (B&F Vocal).wav
+:PROPERTIES:
+:Author:    Artful Dodger
+:Title:     Anytime, Anywhere
+:Version:   Bump & Flex Vocal
+:Year:      1999
+:Release:   Locked On
+:END:
+** v_Artful Dodger - Moving Too Fast (Original).wav
+:PROPERTIES:
+:Author:    Artful Dodger
+:Title:     Anytime, Anywhere
+:Version:   Original Mix
+:Year:      1999
+:Release:   Locked On
+:END:
+** v_Artful Dodger - Moving Too Fast (Pussy Vocal).wav
+:PROPERTIES:
+:Author:    Artful Dodger
+:Title:     Anytime, Anywhere
+:Version:   Pussy 2000 Vocal
+:Year:      1999
+:Release:   Locked On
+:END:
+** v_PSB - WEG (TA 4292 A).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     West End Girls
+:Year:      1984
+:Release:   Epic TA 4292
+:END:
+** v_PSB - PSB (TA 4292 B).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Pet Shop Boys
+:Year:      1984
+:Release:   Epic TA 4292
+:END:
+** v_PSB - WEG (HTO 15 A).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     West End Girls   
+:Year:      1991 ???
+:Release:   HTO 15
+:END:
+** v_Screamin' Tony Baxter - Get Up Off Of That Thing.wav
+:PROPERTIES:
+:Author:    Screamin' Tony Baxter
+:Title:     Get Up Off Of That Thing
+:Year:      1991 ???
+:Release:   HTO 15
+:END:
+** v_PSB - West End Sunglasses (5196 A).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     West End - Sunglasses
+:Year:      1984
+:Release:   ZYX 5196
+:END:
+** v_PSB - One More Chance (5196 B).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     One More Chance 
+:Year:      1984
+:Release:   ZYX 5196
+:END:
+** v_PSB - One More Chance (Promo 4Z9 05019 A).wav
+:PROPERTIES:
+:Author:    The Pet Shop Boys
+:Title:     One More Chance
+:Year:      1984
+:Release:   Bobcat 4Z9 05019 Promo
+:END:
+** v_PSB - One More Chance (Promo 4Z9 05019 B).wav
+:PROPERTIES:
+:Author:    The Pet Shop Boys
+:Title:     One More Chance
+:Version:   Remix
+:Year:      1984
+:Release:   Bobcat 4Z9 05019 Promo
+:END:
+** v_PSB - One More Chance (4Z9 05019 A).wav
+:PROPERTIES:
+:Author:    The Pet Shop Boys
+:Title:     One More Chance
+:Year:      1984
+:Release:   Bobcat 4Z9 05019
+:END:
+** v_PSB - WEG (4Z9 05019 B).wav
+:PROPERTIES:
+:Author:    The Pet Shop Boys
+:Title:     West End Girls  
+:Year:      1984
+:Release:   Bobcat 4Z9 05019
+:END:
+** v_PSB - One More Chance (12 36 A).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     One More Chance
+:Version:   Remix
+:Year:      1984
+:Release:   CHAN 12 36
+:END:
+** v_PSB - One More Chance (12 36 B).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     One More Chance
+:Year:      1984
+:Release:   CHAN 12 36
+:END:
+** v_PSB - WEG (5391 A).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     West End Girls  
+:Version:   Remix '86
+:Year:      1986
+:Release:   ZXY 5391
+:END:
+** v_PSB - Theme (5391 B).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Theme For The Pet Shop Boys
+:Year:      1986
+:Release:   ZXY 5391
+:END:
+** v_PSB - Opportunities (Promo 9669 A).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Opportunities
+:Title+:    (Let's Make Lots Of Money)
+:Version:   
+:Year:      1985
+:Release:   SPRO-9669
+:END:
+** v_PSB - Opportunities (Promo 9669 B).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Opportunities
+:Title+:    (Let's Make Lots Of Money)
+:Version:   
+:Year:      1985
+:Release:   SPRO-9669
+:Notes:     Same as side A ???
+:END:
+** v_PSB - Opportunities (75108 A).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Opportunities
+:Title+:    (Let's Make Lots Of Money) (Double your money mix)
+:Version:   Extended Version
+:Year:      1985
+:Release:   V75108
+:Notes:     Sleeve: Opportunities (Dance Mix)
+:END:
+** v_PSB - In The Night (75108 B1).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     In The Night
+:Year:      1985
+:Release:   V75108
+:END:
+** v_PSB - Opportunities (75108 B2).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Opportunities
+:Title+:    (Let's Make Lots Of Money)
+:Version:   Short Version
+:Year:      1985
+:Release:   V75108
+:Notes:     Sleeve: Opportunities (Dance Mix)
+:END:
+** v_PSB - Opportunities (6097 A).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Opportunities  
+:Title+:    (Let's Make Lots Of Money)
+:Version:   Version Latina
+:Year:      1985
+:Release:   12 RA 6097 
+:Notes:     6" central picture
+:END:
+** v_PSB - Opportunities (6097 B1).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Opportunities  
+:Version:   Dub For Money
+:Year:      1985
+:Release:   12 RA 6097 
+:Notes:     6" central picture
+:END:
+** v_PSB - In The Night (6097 B2).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     In The Night
+:Year:      1985
+:Release:   12 RA 6097 
+:Notes:     Not listed
+:END:
+** v_PSB - WEG (10R6115 A).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     West End Girls
+:Year:      1984
+:Release:   10 R 6165
+:Notes:     10"
+:END:
+** v_PSB - AMCGA (10R6115 B).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     A Man Could Get Arrested
+:Year:      1984
+:Release:   10 R 6165
+:Notes:     10"
+:END:
+** v_PSB - WEG (6115 A).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     West End Girls
+:Version:   Dance Mix
+:Year:      1984
+:Release:   12 R 6165
+:END:
+** v_PSB - AMCGA (6115 B1).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     A Man Could Get Arrested
+:Year:      1984
+:Release:   12 R 6165
+:END:
+** v_PSB - WEG (6115 B2).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     West End Girls
+:Year:      1984
+:Release:   12 R 6165
+:END:
+** v_PSB - WEG (0923 A).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     West End Girls
+:Version:   Dance Mix
+:Year:      1984
+:Release:   20 0923 6
+:Notes:     Signed by Neil & Chris
+:END:
+** v_PSB - AMCGA (0923 B1).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     A Man Could Get Arrested
+:Year:      1984
+:Release:   20 0923 6
+:Notes:     Signed by Neil & Chris
+:END:
+** v_PSB - WEG (0923 B2).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     West End Girls
+:Year:      1984
+:Release:   20 0923 6
+:Notes:     Signed by Neil & Chris
+:END:
+** v_PSB - WEG (RA6115 A).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     West End Girls
+:Version:   The Shep Pettibone Mastermix
+:Year:      1985
+:Release:   12 RA 6165
+:END:
+** v_PSB - WEG (RA6115 B1).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     West End Dub
+:Year:      1985
+:Release:   12 RA 6165
+:END:
+** v_PSB - AMCGA (RA6115 B2).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     A Man Could Get Arrested
+:Year:      1985
+:Release:   12 RA 6165
+:END:
+** v_PSB - Loves Comes Quickly (2011066 A).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Loves Comes Quickly
+:Version:   Dance Mix
+:Year:      1986  
+:Release:   14 2011066
+:END:
+** v_PSB - That's My Impression (2011066 B).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     That's My Impression  
+:Version:   Disco Mix
+:Year:      1986
+:Release:   14 2011066
+:END:
+** v_PSB - Loves Comes Quickly (19218 A1).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Loves Comes Quickly
+:Version:   Pettibone Mastermix
+:Year:      1986  
+:Release:   V-19218 
+:Notes:     Shep Pettibone Mastermix
+:END:
+** v_PSB - Loves Comes Quickly (19218 A2).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Loves Comes Quickly
+:Version:   Dub Version
+:Year:      1986  
+:Release:   V-19218 
+:END:
+** v_PSB - Loves Comes Quickly (19218 B1).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Loves Comes Quickly
+:Version:   Dance Mix
+:Year:      1986  
+:Release:   V-19218 
+:Notes:     Stephen Hangue Dance Mix
+:END:
+** v_PSB - That's My Impression (19218 B2).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     That's My Impression  
+:Version:   Disco Mix
+:Year:      1986
+:Release:   V-19218 
+:END:
+** v_PSB - Loves Comes Quickly (6116 A).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Loves Comes Quickly
+:Version:   Dance Mix
+:Year:      1986  
+:Release:   10 R 6116
+:Notes:     10"
+:END:
+** v_PSB - That's My Impression (6116 B).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     That's My Impression  
+:Version:   Disco Mix
+:Year:      1986
+:Release:   10 R 6116
+:Notes:     10"
+:END:
+** v_PSB - It's A Sin (6158 A).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     It's A Sin
+:Version:   Disco Mix
+:Year:      1987
+:Release:   12 R 6158
+:Notes:     Japanese release
+:END:
+** v_PSB - YKWYWW (6158 B1).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     You Know Where You Went Wrong
+:Year:      1987
+:Release:   12 R 6158
+:END:
+** v_PSB - It's A Sin (6158 B2).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     It's A Sin
+:Version:   7" Version
+:Year:      1987
+:Release:   12 R 6158
+:END:
+** v_PSB - It's A Sin (1889 A).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     It's A Sin
+:Version:   Disco Mix
+:Year:      1987
+:Release:   20 1889 6
+:END:
+** v_PSB - YKWYWW (1889 B1).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     You Know Where You Went Wrong
+:Year:      1987
+:Release:   20 1889 6
+:END:
+** v_PSB - It's A Sin (1889 B2).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     It's A Sin
+:Version:   7" Version
+:Year:      1987
+:Release:   20 1889 6
+:END:
+** v_PSB - It's A Sin (1942 A).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     It's A Sin
+:Version:   Remix
+:Year:      1987
+:Release:   20 1942 6
+:END:
+** v_PSB - YKWYWW (1942 B).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     You Know Where You Went Wrong
+:Version:   Rough Mix
+:Year:      1987
+:Release:   20 1942 6
+:END:
+** v_PSB - It's A Sin (19256 A1).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     It's A Sin
+:Version:   Vocal Mix
+:Year:      1987
+:Release:   V-19256
+:Notes:     Sleeve mislabeled
+:END:
+** v_PSB - It's A Sin (19256 A2).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     It's A Sin
+:Version:   Dub
+:Year:      1987
+:Release:   V-19256
+:Notes:     Sleeve mislabeled
+:END:
+** v_PSB - It's A Sin (19256 B1).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     It's A Sin
+:Version:   Remix
+:Year:      1987
+:Release:   V-19256
+:Notes:     Sleeve mislabeled
+:END:
+** v_PSB - It's A Sin (19256 B2).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     It's A Sin
+:Version:   Disco Mix
+:Year:      1987
+:Release:   V-19256
+:Notes:     Sleeve mislabeled
+:END:
+** v_PSB - YKWYWW (19256 B3).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     You Know Where You Went Wrong
+:Year:      1987
+:Release:   V-19256
+:Notes:     Sleeve mislabeled
+:END:
+** v_PSB - Opportunities (6129 A1).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Opportunities
+:Title+:    (Let's Make Lots Of Money)
+:Version:   Shep Pettibone Mastermix
+:Year:      1986
+:Release:   12 R 6129
+:Notes:     Black Sleeve
+:END:
+** v_PSB - Opportunities (6129 A2).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Opportunities
+:Version:   Reprise
+:Year:      1986
+:Release:   12 R 6129
+:Notes:     Black Sleeve
+:END:
+** v_PSB - Opportunities (6129 B1).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Opportunities
+:Title+:    (Let's Make Lots Of Money)
+:Version:   Original 12" Mix
+:Year:      1986
+:Release:   12 R 6129
+:Notes:     Black Sleeve
+:END:
+** v_PSB - WTWIW (6129 B2).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Was That What It Was?
+:Year:      1986
+:Release:   12 R 6129
+:Notes:     Black Sleeve
+:END:
+** v_PSB - Opportunities (R6129 A1).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Opportunities
+:Title+:    (Let's Make Lots Of Money)
+:Year:      1986
+:Release:   12 R 6129
+:END:
+** v_PSB - Opportunities (R6129 A2).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Opportunities
+:Version:   Reprise
+:Year:      1986
+:Release:   12 R 6129
+:END:
+** v_PSB - Opportunities (R6129 B1).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Opportunities
+:Title+:    (Let's Make Lots Of Money)
+:Version:   Original Dance Mix
+:Year:      1986
+:Release:   12 R 6129
+:END:
+** v_PSB - WTWIW (R6129 B2).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Was That What It Was?
+:Year:      1986
+:Release:   12 R 6129
+:END:
+** v_PSB - Suburbia (1464 A).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Suburbia
+:Version:   The Full Horror
+:Year:      1986
+:Release:   20 1464 6
+:END:
+** v_PSB - Paninaro (1464 B1).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Paninaro
+:Year:      1986
+:Release:   20 1464 6
+:END:
+** v_PSB - Jack The Lad (1464 B2).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Jack The Lad
+:Year:      1986
+:Release:   20 1464 6
+:END:
+** v_PSB - Suburbia (Promo 9925 A).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Suburbia
+:Version:   Club Vocal Mix
+:Year:      1986
+:Release:   SPRO-9925
+:Notes:     "Special Arthur Baker Remix"
+:END:
+** v_PSB - Suburbia (Promo 9925 B).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Suburbia
+:Version:   Dub Version
+:Year:      1986
+:Release:   SPRO-9925
+:Notes:     "Special Arthur Baker Remix"
+:END:
+** v_PSB - Paninaro (2015626 A).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Paninaro
+:Version:   Italian Remix
+:Year:      1986
+:Release:   14 2015626
+:Notes:     "The Pet Shop Boys Mix"
+:END:
+** v_PSB - Paninaro (2015626 B).wav
+:PROPERTIES:
+:Author:    Pet Shop Boys
+:Title:     Paninaro
+:Version:   Ian Levine Mix
+:Year:      1986
+:Release:   14 2015626
+:Notes:     "The Ian Levine Mix"
+:END:
