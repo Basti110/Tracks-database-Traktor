@@ -16,7 +16,7 @@ pub struct OrgEntry {
 impl OrgEntry {
     pub fn new() -> OrgEntry {
         OrgEntry {
-            name: String::from(""),
+            name: "".to_string(),
             author: "".to_string(),
             author_add: "".to_string(),
             title: "".to_string(),
@@ -43,17 +43,68 @@ impl OrgList {
 
     pub fn parse_file(path: &String) -> io::Result<OrgList> {
         let f = File::open(path)?;
-        let reader = BufReader::new(f);
+        let mut reader = BufReader::new(f);
         let mut orgList = OrgList::new();
 
-        for buffer in reader.lines() { 
-            let mut line = buffer.unwrap();
-
+        //let test = reader.nex();
+        let mut line = "".to_string();
+        //let mut len: usize = 0;
+        
+        loop {
+            line = "".to_string();
+            let len = reader.read_line(&mut line)?;
+            let mut entry = OrgEntry::new();
+            if len == 0 {
+                break;
+            }   
+            line.pop();
             if line.match_first_chars( "**".to_string()) {
                 line.drain(..3);
-                println!("Name: {}", line);
+                entry.name = line.clone();
+                //println!("Name: {}", line);
+                loop {
+                    line = "".to_string();
+                    let len2 = reader.read_line(&mut line)?;
+                    line.pop();
+                    if len2 == 0 {
+                        break;
+                    }
+                    if line.match_first_chars( ":END:".to_string()) {
+                        //println!("End");
+                        break;
+                    }
+                    if line.match_first_chars( ":PROPERTIES:".to_string()) {
+                        //println!("Release");
+                    } 
+                    else if line.match_first_chars( ":Author:".to_string()) {
+                        //println!("Author");
+                    } 
+                    else if line.match_first_chars( ":Author+:".to_string()) {
+                        //println!("Author");
+                    } 
+                    else if line.match_first_chars( ":Title:".to_string()) {
+                        //println!("Title");
+                    }
+                    else if line.match_first_chars( ":Title+:".to_string()) {
+                        //println!("Title");
+                    }
+                    else if line.match_first_chars( ":Version:".to_string()) {
+                        //println!("Version");
+                    }
+                    else if line.match_first_chars( ":Year:".to_string()) {
+                        //println!("Year");
+                    }
+                    else if line.match_first_chars( ":Release:".to_string()) {
+                        //println!("Release");
+                    } 
+                    else if line.match_first_chars( ":Notes:".to_string()) {
+                        //println!("Release");
+                    } 
+                    else { 
+                        println!("{}", line);
+                    }
+                }
             }
-            // println!("{}{}", char1, char2);
         }
 
         Ok(orgList)
