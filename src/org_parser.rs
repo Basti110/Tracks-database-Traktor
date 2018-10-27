@@ -49,7 +49,7 @@ impl OrgList {
         for buffer in reader.lines() { 
             let mut line = buffer.unwrap();
 
-            if OrgList::match_first_chars(&line, "**".to_string()) {
+            if line.match_first_chars( "**".to_string()) {
                 line.drain(..3);
                 println!("Name: {}", line);
             }
@@ -74,9 +74,15 @@ impl OrgList {
         }
         None
     }
+}
 
-    fn match_first_chars(string: &String, pat: String) -> bool {
-        let mut string_chars = string.chars();
+trait StringParse {
+    fn match_first_chars(&self, pat: String) -> bool;
+}
+
+impl StringParse for String {
+    fn match_first_chars(&self, pat: String) -> bool {
+        let mut string_chars = self.chars();
         let mut pat_chars = pat.chars();
 
         loop {
@@ -93,3 +99,4 @@ impl OrgList {
         }
     }
 }
+
