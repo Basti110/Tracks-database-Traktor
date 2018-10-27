@@ -8,9 +8,11 @@ pub struct OrgEntry {
     pub author: String,
     author_add: String,
     title: String,
+    title_add: String,
     version: String,
     year: String,
     release: String,
+    notes: String
 }
 
 impl OrgEntry {
@@ -20,10 +22,61 @@ impl OrgEntry {
             author: "".to_string(),
             author_add: "".to_string(),
             title: "".to_string(),
+            title_add: "".to_string(),
             version: "".to_string(),
             year: "".to_string(),
             release: "".to_string(), 
+            notes: "".to_string(), 
         }
+    }
+
+    pub fn to_string(self) -> String {
+        let mut string = "** ".to_string();
+        string.push_str(&self.name);
+        string.push_str(&"\n");
+        string.push_str(&":PROPERTIES:\n");
+        if self.author != "".to_string() {
+            string.push_str(&":Author:    ");
+            string.push_str(&self.author);
+            string.push_str(&"\n");
+        }
+        if self.author_add != "".to_string() {
+            string.push_str(&":Author+:   ");
+            string.push_str(&self.author_add);
+            string.push_str(&"\n");
+        }
+        if self.title != "".to_string() {
+            string.push_str(&":Title:     ");
+            string.push_str(&self.title);
+            string.push_str(&"\n");
+        }
+        if self.title_add != "".to_string() {
+            string.push_str(&":Title+:    ");
+            string.push_str(&self.title_add);
+            string.push_str(&"\n");
+        }
+        if self.version != "".to_string() {
+            string.push_str(&":Version:   ");
+            string.push_str(&self.version);
+            string.push_str(&"\n");
+        }
+        if self.year != "".to_string() {
+            string.push_str(&":Year:      ");
+            string.push_str(&self.year);
+            string.push_str(&"\n");
+        }
+        if self.release != "".to_string() {
+            string.push_str(&":Release:   ");
+            string.push_str(&self.release);
+            string.push_str(&"\n");
+        }
+        if self.notes != "".to_string() {
+            string.push_str(&":Notes:     ");
+            string.push_str(&self.notes);
+            string.push_str(&"\n");
+        }
+        string.push_str(&":END:");
+        string
     }
 }
 
@@ -74,36 +127,53 @@ impl OrgList {
                         break;
                     }
                     if line.match_first_chars( ":PROPERTIES:".to_string()) {
-                        //println!("Release");
+                        //println!("PROPERTIES");
                     } 
                     else if line.match_first_chars( ":Author:".to_string()) {
+                        line.drain(..8);
+                        entry.author = line.trim().to_string();
                         //println!("Author");
                     } 
                     else if line.match_first_chars( ":Author+:".to_string()) {
-                        //println!("Author");
+                        line.drain(..9);
+                        entry.author_add = line.trim().to_string();
+                        //println!("Author+");
                     } 
                     else if line.match_first_chars( ":Title:".to_string()) {
+                        line.drain(..7);
+                        entry.title = line.trim().to_string();
                         //println!("Title");
                     }
                     else if line.match_first_chars( ":Title+:".to_string()) {
-                        //println!("Title");
+                        line.drain(..8);
+                        entry.title_add = line.trim().to_string();
+                        //println!("Title+");
                     }
                     else if line.match_first_chars( ":Version:".to_string()) {
+                        line.drain(..9);
+                        entry.version = line.trim().to_string();
                         //println!("Version");
                     }
                     else if line.match_first_chars( ":Year:".to_string()) {
+                        line.drain(..6);
+                        entry.year = line.trim().to_string();
                         //println!("Year");
                     }
                     else if line.match_first_chars( ":Release:".to_string()) {
+                        line.drain(..9);
+                        entry.release = line.trim().to_string();
                         //println!("Release");
                     } 
                     else if line.match_first_chars( ":Notes:".to_string()) {
-                        //println!("Release");
+                        line.drain(..7);
+                        entry.notes = line.trim().to_string();
+                        //println!("Notes");
                     } 
                     else { 
                         println!("{}", line);
                     }
                 }
+                println!("{}", entry.to_string());
             }
         }
 
