@@ -15,24 +15,25 @@ fn main() -> io::Result<()> {
         write_files_from_list()?;
     }
     //check_files(FILE_DIR)?;
-    let mut entry = org_parser::OrgEntry::new(); 
-    entry.name = "test".to_string();
-    entry.author = "autor 1".to_string();
-    let mut entry_list = org_parser::OrgList::new();  
-    entry_list.add(entry);
-    {
-        let entry2 = entry_list.find_entry("test".to_string()).unwrap();
-        entry2.author = "lol".to_string();
-    }
-    let entry3 = entry_list.find_entry("test".to_string());
-    println!("{}", entry3.unwrap().author);
+    // let mut entry = org_parser::OrgEntry::new(); 
+    // entry.name = "test".to_string();
+    // entry.author = "autor 1".to_string();
+    // let mut entry_list = org_parser::OrgList::new();  
+    // entry_list.add(entry);
+    // {
+    //     let entry2 = entry_list.find_entry("test".to_string()).unwrap();
+    //     entry2.author = "lol".to_string();
+    // }
+    // let entry3 = entry_list.find_entry("test".to_string());
+    // println!("{}", entry3.unwrap().author);
+    let entry = org_parser::OrgList::parse_file(&"src/files/tracks.org".to_string())?;
     Ok(())
 }
 
 fn write_files_from_list() -> io::Result<()> {
     let f = File::open(TRACK_LIST_PATH)?;
     let reader = BufReader::new(f);
-    println!("{}", "Generate files");
+    //println!("{}", "Generate files");
     let begin = String::from("files/");
     for buffer in reader.lines() {
         let line = buffer.unwrap().clone();//buffer.clone();

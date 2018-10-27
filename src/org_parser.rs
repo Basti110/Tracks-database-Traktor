@@ -1,3 +1,8 @@
+use std::io;
+use std::io::BufReader;
+use std::fs::File;
+use std::io::prelude::*;
+
 pub struct OrgEntry {
     pub name: String,
     pub author: String,
@@ -36,15 +41,55 @@ impl OrgList {
         self.orgs.push(value);
     }
 
+    pub fn parse_file(path: &String) -> io::Result<OrgList> {
+        let f = File::open(path)?;
+        let reader = BufReader::new(f);
+        let mut orgList = OrgList::new();
+
+        for buffer in reader.lines() { 
+            let mut line = buffer.unwrap();
+
+            if OrgList::match_first_chars(&line, "**".to_string()) {
+                line.drain(..3);
+                println!("Name: {}", line);
+            }
+            // println!("{}{}", char1, char2);
+        }
+
+        Ok(orgList)
+    }
+
     pub fn find_entry(&mut self, name: String) -> Option<&mut OrgEntry> {
         let mut count = 0;
+        let mut found = false;
         for mut entry in &self.orgs {
             if entry.name == name {
+                found = true;
                 break;
             }
             count += 1;
         }
-        return Some(&mut self.orgs[count]);
+        if found {
+            return Some(&mut self.orgs[count]);
+        }
         None
+    }
+
+    fn match_first_chars(string: &String, pat: String) -> bool {
+        let mut string_chars = string.chars();
+        let mut pat_chars = pat.chars();
+
+        loop {
+            let char1 = string_chars.next();
+            let char2 = pat_chars.next();
+
+            if char2 == None {
+                return true;
+            }   
+
+            if char1 == None || char1 != char2 {
+                return false;
+            } 
+        }
     }
 }
