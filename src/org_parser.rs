@@ -71,7 +71,7 @@ impl OrgEntry {
             string.push_str(&"\n");
         }
         if self.notes != "".to_string() {
-            string.push_str(&":Notes:     ");
+            string.push_str(&":Notes:     git ");
             string.push_str(&self.notes);
             string.push_str(&"\n");
         }

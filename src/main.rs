@@ -26,7 +26,10 @@ fn main() -> io::Result<()> {
     // }
     // let entry3 = entry_list.find_entry("test".to_string());
     // println!("{}", entry3.unwrap().author);
-    let entry = org_parser::OrgList::parse_file(&"src/files/tracks.org".to_string())?;
+
+    //let entry = org_parser::OrgList::parse_file(&"src/files/tracks.org".to_string())?;
+    
+    sort_mp3_m4a("files/")?;
     Ok(())
 }
 
@@ -157,6 +160,44 @@ fn get_version_name_pos(file_name: &String) -> io::Result<usize> {
         }
     }
     Ok(pos)
+}
+
+fn sort_mp3_m4a(path: &str) -> io::Result<()> {
+    let new_path = format!("{}{}", path, "1mp3/");
+    //let folders = fs::read_dir(new_path)?;
+    let mut count = 0;
+
+    //println!("Name: {}", path);
+    let files = fs::read_dir(new_path)?;
+    for file in files {
+        let file_name = get_file_name(file)?;
+        let len = file_name.len();
+
+        //let extension: &str;
+        let extension = match file_name.get(len - 9..len) {
+            Some(x) => x,
+            None => continue,
+        };
+
+        if extension.chars().next().unwrap() != '.' {
+            continue;
+        }
+
+        let extension = match extension.get(1..5) {
+            Some(x) => x,
+            None => continue,
+        };
+
+       match extension.parse::<i32>(){
+            Ok(x) => x,
+            Err(e) => continue,
+        };
+        
+        println!("Name: {}", extension);
+    }
+    
+    println!("Count {}; ", count);
+    Ok(())
 }
 
 trait StringUtils {
