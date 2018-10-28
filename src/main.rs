@@ -192,7 +192,22 @@ fn sort_mp3_m4a(path: &str) -> io::Result<()> {
             Ok(x) => x,
             Err(e) => continue,
         };
+        println!("Name: {}", file_name);
+        let new_path = format!("{}{}{}", path, extension, "/");
+        println!("Name: {}", new_path);
+        if !Path::new(&new_path).exists() {
+            fs::create_dir(&new_path)?;
+        }
         
+        let new_name = match file_name.get(0..len - 9) {
+            Some(x) => x,
+            None => continue,
+        };
+        println!("Name: {}", new_name);
+        let new_path = format!("{}{}{}", new_path, new_name, "mp3");
+        println!("Name: {}", new_path);
+        println!("Name: {}", format!("{}{}",path, file_name));
+        fs::rename(format!("{}{}{}",path, "1mp3/", file_name), new_path)?;
         println!("Name: {}", extension);
     }
     
