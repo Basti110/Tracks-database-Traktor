@@ -8,12 +8,19 @@ mod org_parser;
 const GENERATE_DATA: bool = false;
 const TRACK_LIST_PATH: &str = "src/files/tracks-sample.txt";
 const FILE_DIR: &str = "files/";
-const MAX_FILE_NAME_LEN: usize = 84;
+const MAX_FILE_NAME_LEN: usize = 80;
+static SEPARATE_AUTHOR: &'static [&str] = &["feat", "ft", "presents", "pres", "with", "introduce"];
 
 fn main() -> io::Result<()> {
     if GENERATE_DATA {
         write_files_from_list()?;
+        sort_mp3_m4a("files/")?;
+        check_files(FILE_DIR)?;
     }
+    //let test = "Hello World".to_string();
+    //let lol = test.substring(2, 5);
+    //println!("Name: {}", test);
+    check_files(FILE_DIR)?;
     //check_files(FILE_DIR)?;
     // let mut entry = org_parser::OrgEntry::new(); 
     // entry.name = "test".to_string();
@@ -28,8 +35,6 @@ fn main() -> io::Result<()> {
     // println!("{}", entry3.unwrap().author);
 
     //let entry = org_parser::OrgList::parse_file(&"src/files/tracks.org".to_string())?;
-    
-    sort_mp3_m4a("files/")?;
     Ok(())
 }
 
@@ -71,8 +76,8 @@ fn check_files(path: &str) -> io::Result<()> {
         for file in files { 
             let file_name = get_file_name(file)?;
             if file_name.len() > MAX_FILE_NAME_LEN {
-                get_name_parts(&file_name)?;
                 println!("Name: {}", file_name);
+                get_name_parts(&file_name)?;
                 count += 1;
             }
         }
@@ -116,7 +121,9 @@ fn get_name_parts(file_name: &String) -> io::Result<()> {
         version = version.get_unchecked(0..extension_pos + offset);
     }
     println!("author: {}", author);
-    println!("title: {}", title);
+    println!("author short: {}", shorter_author(&author.to_string()));
+    println!("----title: {}", title);
+    println!("----title short: {}", shorter_title(&title.to_string()));
     println!("version: {}", version);
 
     Ok(())
@@ -132,6 +139,76 @@ fn get_author_name_pos(file_name: &String) -> io::Result<usize> {
     Ok(pos)
 }
 
+fn shorter_author(author: &String) -> String {
+    let len = SEPARATE_AUTHOR.len();
+    let mut pos: usize = 255;
+    for x in 0..len {
+        pos = match author.find(SEPARATE_AUTHOR[x]) {
+            Some(x) => if x < pos {
+                x
+            }
+            else {
+                pos
+            }
+            None => pos,
+        };
+    } 
+    if pos != 255 {
+        match author.get(0..pos) {
+            Some(x) => {
+                let mut y = x.trim().to_string();
+                y.push_str("_");
+                return y 
+            },
+            None => return author.clone(),
+        };
+    }
+    author.clone()
+}
+
+fn shorter_title(title: &String) -> String {
+    match title.find("(") {
+        Some(x) => x,
+        None => return title.clone(),
+    };
+    let mut open_pos: usize = 0;
+    let mut close_pos: usize = 0;
+    {
+        let mut count = 0;
+        let mut char_pos: usize = 0;
+        let mut chars = title.chars();
+        
+        loop {
+            let c = match chars.next() {
+                Some(x) => x,
+                None => break,
+            };
+
+            if c == '(' {
+                if count == 0 {
+                    open_pos = char_pos;
+                }
+                count += 1;
+            }
+            else if c == ')' {
+                close_pos = char_pos;
+                count -= 1;
+            }
+            if count == 0 && open_pos != 0 {
+                break;
+            }
+            char_pos += c.len_utf8();
+        }
+    }
+    if open_pos != 0 && open_pos < close_pos {
+        let mut new_title = title.get(0..open_pos).unwrap().to_string();
+        let end = title.get(close_pos + 1..).unwrap();
+        new_title.push_str(end);
+        return new_title;
+    }
+    title.clone()
+}
+
 fn get_version_name_pos(file_name: &String) -> io::Result<usize> {
     let mut pos = file_name.rfind_result(").")?;
     let mut slice;
@@ -140,13 +217,11 @@ fn get_version_name_pos(file_name: &String) -> io::Result<usize> {
         unsafe {
             slice = file_name.get_unchecked(0..pos);
         } 
-        //println!("Name: {}", slice);
         let pos1 = match slice.rfind(")") {
             Some(x) => x,
             None => 0,
         };
         let pos2 = slice.to_string().rfind_result("(")?;
-        //println!("pos1: {} pos2: {}", pos1, pos2);
         if pos1 > pos2 {
             count += 1;
             pos = pos1
