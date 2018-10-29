@@ -162,56 +162,54 @@ fn get_version_name_pos(file_name: &String) -> io::Result<usize> {
     Ok(pos)
 }
 
-fn sort_mp3_m4a(path: &str) -> io::Result<()> {
-    let new_path = format!("{}{}", path, "1mp3/");
-    //let folders = fs::read_dir(new_path)?;
-    let mut count = 0;
-
-    //println!("Name: {}", path);
-    let files = fs::read_dir(new_path)?;
+fn move_file_to_year(path: &String, ext: &str) -> io::Result<()> {
+    let files = fs::read_dir(path)?;
+    let ext_len = "ext".len();
     for file in files {
         let file_name = get_file_name(file)?;
         let len = file_name.len();
 
-        //let extension: &str;
-        let extension = match file_name.get(len - 9..len) {
+        let extension_with_year = match file_name.get(len - (ext_len + 6)..len) {
             Some(x) => x,
             None => continue,
         };
 
-        if extension.chars().next().unwrap() != '.' {
+        if extension_with_year.chars().next().unwrap() != '.' {
             continue;
         }
 
-        let extension = match extension.get(1..5) {
+        let year = match extension_with_year.get(1..5) {
             Some(x) => x,
             None => continue,
         };
 
-       match extension.parse::<i32>(){
+       match year.parse::<i32>(){
             Ok(x) => x,
             Err(e) => continue,
         };
-        println!("Name: {}", file_name);
-        let new_path = format!("{}{}{}", path, extension, "/");
-        println!("Name: {}", new_path);
+        
+        let new_path = format!("{}{}{}", path, year, "/");
+
         if !Path::new(&new_path).exists() {
             fs::create_dir(&new_path)?;
         }
         
-        let new_name = match file_name.get(0..len - 9) {
+        let new_name = match file_name.get(0..len - (ext_len + 6)) {
             Some(x) => x,
             None => continue,
         };
-        println!("Name: {}", new_name);
-        let new_path = format!("{}{}{}", new_path, new_name, "mp3");
-        println!("Name: {}", new_path);
-        println!("Name: {}", format!("{}{}",path, file_name));
-        fs::rename(format!("{}{}{}",path, "1mp3/", file_name), new_path)?;
-        println!("Name: {}", extension);
+
+        let new_path = format!("{}{}{}", new_path, new_name, ext);
+        fs::rename(format!("{}{}",path, file_name), new_path)?;
     }
-    
-    println!("Count {}; ", count);
+    Ok(())
+}
+
+fn sort_mp3_m4a(path: &str) -> io::Result<()> {
+    let mp3_path = format!("{}{}", path, "1mp3/");
+    let m4a_path = format!("{}{}", path, "1m4a/");
+    move_file_to_year(&mp3_path, "mp3")?;
+    move_file_to_year(&m4a_path, "m4a")?;
     Ok(())
 }
 
