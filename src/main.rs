@@ -68,7 +68,7 @@ fn check_files(path: &str) -> io::Result<()> {
         let folder_path: String = folder.unwrap().path().display().to_string();
         //println!("Name: {}", path);
         let files = fs::read_dir(folder_path)?;
-        for file in files {
+        for file in files { 
             let file_name = get_file_name(file)?;
             if file_name.len() > MAX_FILE_NAME_LEN {
                 get_name_parts(&file_name)?;
@@ -162,8 +162,8 @@ fn get_version_name_pos(file_name: &String) -> io::Result<usize> {
     Ok(pos)
 }
 
-fn move_file_to_year(path: &String, ext: &str) -> io::Result<()> {
-    let files = fs::read_dir(path)?;
+fn move_file_to_year(path_src: &String, path_dst: &str, ext: &str) -> io::Result<()> {
+    let files = fs::read_dir(path_src)?;
     let ext_len = "ext".len();
     for file in files {
         let file_name = get_file_name(file)?;
@@ -188,7 +188,7 @@ fn move_file_to_year(path: &String, ext: &str) -> io::Result<()> {
             Err(e) => continue,
         };
         
-        let new_path = format!("{}{}{}", path, year, "/");
+        let new_path = format!("{}{}{}", path_dst, year, "/");
 
         if !Path::new(&new_path).exists() {
             fs::create_dir(&new_path)?;
@@ -200,7 +200,7 @@ fn move_file_to_year(path: &String, ext: &str) -> io::Result<()> {
         };
 
         let new_path = format!("{}{}{}", new_path, new_name, ext);
-        fs::rename(format!("{}{}",path, file_name), new_path)?;
+        fs::rename(format!("{}{}",path_src, file_name), new_path)?;
     }
     Ok(())
 }
@@ -208,8 +208,8 @@ fn move_file_to_year(path: &String, ext: &str) -> io::Result<()> {
 fn sort_mp3_m4a(path: &str) -> io::Result<()> {
     let mp3_path = format!("{}{}", path, "1mp3/");
     let m4a_path = format!("{}{}", path, "1m4a/");
-    move_file_to_year(&mp3_path, "mp3")?;
-    move_file_to_year(&m4a_path, "m4a")?;
+    move_file_to_year(&mp3_path, "files/", "mp3")?;
+    move_file_to_year(&m4a_path, "files/", "m4a")?;
     Ok(())
 }
 

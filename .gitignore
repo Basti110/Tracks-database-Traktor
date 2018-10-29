@@ -1,4 +1,5 @@
 rls/
 target/
+files/
 hello.exe
 hello.pdb
