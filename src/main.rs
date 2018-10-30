@@ -10,6 +10,7 @@ const TRACK_LIST_PATH: &str = "src/files/tracks-sample.txt";
 const FILE_DIR: &str = "files/";
 const MAX_FILE_NAME_LEN: usize = 80;
 static SEPARATE_AUTHOR: &'static [&str] = &["feat", "ft", "presents", "pres", "with", "introduce"];
+static SEPARATE_VERSION: &'static [&str] = &["Remix", "Mix", "Dub"];
 
 fn main() -> io::Result<()> {
     if GENERATE_DATA {
@@ -120,11 +121,18 @@ fn get_name_parts(file_name: &String) -> io::Result<()> {
     unsafe {
         version = version.get_unchecked(0..extension_pos + offset);
     }
-    println!("author: {}", author);
-    println!("author short: {}", shorter_author(&author.to_string()));
-    println!("----title: {}", title);
-    println!("----title short: {}", shorter_title(&title.to_string()));
-    println!("version: {}", version);
+    // println!("author: {}", author);
+    // println!("author short: {}", shorter_author(&author.to_string()));
+    // println!("title: {}", title);
+    // println!("title short: {}", shorter_title(&title.to_string()));
+    // println!("version: {}", version);
+    // println!("version shorter: {}", shorter_version(&version.to_string()));
+    //println!("Name: {}", file_name.as_str());
+    let mut shorter_name = shorter_author(&author.to_string());
+    shorter_name.push_str(" - ");
+    shorter_name.push_str(shorter_title(&title.to_string()).as_str());
+    shorter_name.push_str(shorter_version(&version.to_string()).as_str());
+    println!("shorter_name: {}", shorter_name);
 
     Ok(())
 }
@@ -132,10 +140,11 @@ fn get_name_parts(file_name: &String) -> io::Result<()> {
 fn get_author_name_pos(file_name: &String) -> io::Result<usize> {
     //let pos = file_name.get_pos('-')?;
     //let author = file_name.substring(0, pos);
-    let pos = match file_name.find(" - ") {
+    let mut pos = match file_name.find(" - ") {
         Some(x) => x,
         None => return Err(Error::new(ErrorKind::InvalidData, "Can not find char in String")),
     };
+    //pos += 2;
     Ok(pos)
 }
 
@@ -166,18 +175,15 @@ fn shorter_author(author: &String) -> String {
     author.clone()
 }
 
-fn shorter_title(title: &String) -> String {
-    match title.find("(") {
-        Some(x) => x,
-        None => return title.clone(),
-    };
+fn remove_first_p(name: &String) -> String {
     let mut open_pos: usize = 0;
     let mut close_pos: usize = 0;
+    let mut found_open = false;
+
     {
         let mut count = 0;
         let mut char_pos: usize = 0;
-        let mut chars = title.chars();
-        
+        let mut chars = name.chars();
         loop {
             let c = match chars.next() {
                 Some(x) => x,
@@ -185,8 +191,9 @@ fn shorter_title(title: &String) -> String {
             };
 
             if c == '(' {
-                if count == 0 {
+                if found_open == false {
                     open_pos = char_pos;
+                    found_open = true;
                 }
                 count += 1;
             }
@@ -200,13 +207,39 @@ fn shorter_title(title: &String) -> String {
             char_pos += c.len_utf8();
         }
     }
-    if open_pos != 0 && open_pos < close_pos {
-        let mut new_title = title.get(0..open_pos).unwrap().to_string();
-        let end = title.get(close_pos + 1..).unwrap();
-        new_title.push_str(end);
-        return new_title;
+    if open_pos < close_pos && found_open == true {
+        return name.rsubstring(open_pos, close_pos);
     }
-    title.clone()
+    name.clone()
+}
+
+fn shorter_title(title: &String) -> String {
+    return remove_first_p(title);
+}
+
+fn shorter_version(version: &String) -> String {
+    let first_pos = match version.find("(") {
+        Some(x) => x,
+        None => return version.clone(),
+    };
+
+    let last_pos = match version.find(")") {
+        Some(x) => x,
+        None => return version.clone(),
+    };
+
+    if first_pos != 0 || last_pos != version.len() - 1 {
+        return remove_first_p(version);
+    }
+
+    let len = SEPARATE_VERSION.len();
+    for i in 0..len {
+        match version.find(SEPARATE_VERSION[i]) {
+            Some(x) => return SEPARATE_VERSION[i].to_string(),
+            None => continue,
+        };
+    }
+    version.clone()
 }
 
 fn get_version_name_pos(file_name: &String) -> io::Result<usize> {
@@ -289,13 +322,27 @@ fn sort_mp3_m4a(path: &str) -> io::Result<()> {
 }
 
 trait StringUtils {
+    //char position
     fn substring(&self, start: usize, len: usize) -> Self;
+    //byte position
+    fn rsubstring(&self, start: usize, end: usize) -> Self;
     fn get_pos(&self, character: char) -> io::Result<usize>;
     fn find_result(&self, pat: &str) -> io::Result<usize>;
     fn rfind_result(&self, pat: &str) -> io::Result<usize>;
 }
 
 impl StringUtils for String {
+
+    fn rsubstring(&self, start: usize, end: usize) -> Self {
+        if self.len() < end || end <= start  {
+            return self.clone();
+        } 
+        let mut new_string = self.get(0..start).unwrap().to_string();
+        let end = self.get(end + 1..).unwrap();
+        new_string.push_str(end);
+        return new_string;
+    }
+
     fn substring(&self, start: usize, len: usize) -> Self {
         self.chars().skip(start).take(len).collect()
     }
