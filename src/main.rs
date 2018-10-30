@@ -1,11 +1,15 @@
+mod org_parser;
+mod string_traits;
+use string_traits::StringUtils;
 use std::io;
 use std::io::prelude::*;
 use std::io::{Error, ErrorKind, BufReader};
 use std::fs;
 use std::fs::{File, DirEntry};
 use std::path::Path;
-mod org_parser;
-const GENERATE_DATA: bool = false;
+
+//Const Settings
+const GENERATE_DATA: bool = true;
 const TRACK_LIST_PATH: &str = "src/files/tracks-sample.txt";
 const FILE_DIR: &str = "files/";
 const MAX_FILE_NAME_LEN: usize = 80;
@@ -14,14 +18,16 @@ static SEPARATE_VERSION: &'static [&str] = &["Remix", "Mix", "Dub"];
 
 fn main() -> io::Result<()> {
     if GENERATE_DATA {
+        if !Path::new(FILE_DIR).exists() {
+            fs::create_dir(FILE_DIR)?;
+        }
+        println!("Write files from tracks-sample.txt");
         write_files_from_list()?;
-        sort_mp3_m4a("files/")?;
-        check_files(FILE_DIR)?;
+        println!("Move mp3 and m4a to the right year");
+        sort_mp3_m4a(FILE_DIR)?;
+        println!("Rename files and check length");
+        check_files(FILE_DIR)?; //rename_files 
     }
-    //let test = "Hello World".to_string();
-    //let lol = test.substring(2, 5);
-    //println!("Name: {}", test);
-    check_files(FILE_DIR)?;
     //check_files(FILE_DIR)?;
     // let mut entry = org_parser::OrgEntry::new(); 
     // entry.name = "test".to_string();
@@ -70,6 +76,7 @@ fn write_files_from_list() -> io::Result<()> {
 fn check_files(path: &str) -> io::Result<()> {
     let folders = fs::read_dir(path)?;
     let mut count = 0;
+    println!("---------------------------- file length > {} ------------------------", MAX_FILE_NAME_LEN);
     for folder in folders {
         let folder_path: String = folder.unwrap().path().display().to_string();
         //println!("Name: {}", path);
@@ -121,19 +128,19 @@ fn get_name_parts(file_name: &String) -> io::Result<()> {
     unsafe {
         version = version.get_unchecked(0..extension_pos + offset);
     }
+
     // println!("author: {}", author);
     // println!("author short: {}", shorter_author(&author.to_string()));
     // println!("title: {}", title);
     // println!("title short: {}", shorter_title(&title.to_string()));
     // println!("version: {}", version);
     // println!("version shorter: {}", shorter_version(&version.to_string()));
-    //println!("Name: {}", file_name.as_str());
+
     let mut shorter_name = shorter_author(&author.to_string());
     shorter_name.push_str(" - ");
     shorter_name.push_str(shorter_title(&title.to_string()).as_str());
     shorter_name.push_str(shorter_version(&version.to_string()).as_str());
     println!("shorter_name: {}", shorter_name);
-
     Ok(())
 }
 
@@ -319,54 +326,4 @@ fn sort_mp3_m4a(path: &str) -> io::Result<()> {
     move_file_to_year(&mp3_path, "files/", "mp3")?;
     move_file_to_year(&m4a_path, "files/", "m4a")?;
     Ok(())
-}
-
-trait StringUtils {
-    //char position
-    fn substring(&self, start: usize, len: usize) -> Self;
-    //byte position
-    fn rsubstring(&self, start: usize, end: usize) -> Self;
-    fn get_pos(&self, character: char) -> io::Result<usize>;
-    fn find_result(&self, pat: &str) -> io::Result<usize>;
-    fn rfind_result(&self, pat: &str) -> io::Result<usize>;
-}
-
-impl StringUtils for String {
-
-    fn rsubstring(&self, start: usize, end: usize) -> Self {
-        if self.len() < end || end <= start  {
-            return self.clone();
-        } 
-        let mut new_string = self.get(0..start).unwrap().to_string();
-        let end = self.get(end + 1..).unwrap();
-        new_string.push_str(end);
-        return new_string;
-    }
-
-    fn substring(&self, start: usize, len: usize) -> Self {
-        self.chars().skip(start).take(len).collect()
-    }
-
-    fn get_pos(&self, character: char) -> io::Result<usize> {
-        match self.chars().position(|c| c == character) {
-            Some(x) => Ok(x),
-            None => Err(Error::new(ErrorKind::InvalidData, format!("Can not find {} in {}", character, self))),
-        }
-    }
-
-    fn find_result(&self, pat: &str) -> io::Result<usize> {
-        let pos = match self.find(pat) {
-            Some(x) => x,
-            None => return Err(Error::new(ErrorKind::InvalidData, format!("Can not find {} in {}", pat, self))),
-        };
-        Ok(pos)
-    }
-
-    fn rfind_result(&self, pat: &str) -> io::Result<usize> {
-        let pos = match self.rfind(pat) {
-            Some(x) => x,
-            None => return Err(Error::new(ErrorKind::InvalidData, format!("Can not find {} in {}", pat, self))),
-        };
-        Ok(pos)
-    }
 }
