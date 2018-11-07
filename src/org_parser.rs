@@ -6,13 +6,13 @@ use std::io::prelude::*;
 pub struct OrgEntry {
     pub name: String,
     pub author: String,
-    author_add: String,
-    title: String,
-    title_add: String,
-    version: String,
-    year: String,
-    release: String,
-    notes: String
+    pub author_add: String,
+    pub title: String,
+    pub title_add: String,
+    pub version: String,
+    pub year: String,
+    pub release: String,
+    pub notes: String
 }
 
 impl OrgEntry {
@@ -30,7 +30,7 @@ impl OrgEntry {
         }
     }
 
-    pub fn to_string(self) -> String {
+    pub fn to_string(&self) -> String {
         let mut string = "** ".to_string();
         string.push_str(&self.name);
         string.push_str(&"\n");
@@ -71,7 +71,7 @@ impl OrgEntry {
             string.push_str(&"\n");
         }
         if self.notes != "".to_string() {
-            string.push_str(&":Notes:     git ");
+            string.push_str(&":Notes:     ");
             string.push_str(&self.notes);
             string.push_str(&"\n");
         }
@@ -92,6 +92,12 @@ impl OrgList {
     }
     pub fn add(&mut self, value: OrgEntry) {
         self.orgs.push(value);
+    }
+
+    pub fn write_file(&self) {
+        for entry in &self.orgs {
+            println!("{}", entry.to_string());
+        }
     }
 
     pub fn parse_file(path: &String) -> io::Result<OrgList> {
@@ -173,7 +179,6 @@ impl OrgList {
                         println!("{}", line);
                     }
                 }
-                println!("{}", entry.to_string());
             }
         }
 

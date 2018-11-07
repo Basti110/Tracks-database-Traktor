@@ -1,4 +1,5 @@
 mod org_parser;
+use org_parser::OrgEntry;
 mod string_traits;
 use string_traits::StringUtils;
 use std::io;
@@ -7,9 +8,14 @@ use std::io::{Error, ErrorKind, BufReader};
 use std::fs;
 use std::fs::{File, DirEntry};
 use std::path::Path;
+use std::str;
+use std::borrow::Cow;
 
+extern crate quick_xml;
+use quick_xml::Reader;
+use quick_xml::events::Event;
 //Const Settings
-const GENERATE_DATA: bool = true;
+const GENERATE_DATA: bool = false;
 const TRACK_LIST_PATH: &str = "src/files/tracks-sample.txt";
 const FILE_DIR: &str = "files/";
 const MAX_FILE_NAME_LEN: usize = 80;
@@ -28,21 +34,67 @@ fn main() -> io::Result<()> {
         println!("Rename files and check length");
         check_files(FILE_DIR)?; //rename_files 
     }
-    //check_files(FILE_DIR)?;
-    // let mut entry = org_parser::OrgEntry::new(); 
-    // entry.name = "test".to_string();
-    // entry.author = "autor 1".to_string();
-    // let mut entry_list = org_parser::OrgList::new();  
-    // entry_list.add(entry);
-    // {
-    //     let entry2 = entry_list.find_entry("test".to_string()).unwrap();
-    //     entry2.author = "lol".to_string();
-    // }
-    // let entry3 = entry_list.find_entry("test".to_string());
-    // println!("{}", entry3.unwrap().author);
+let xml = r#"<tag1 att1 = "Moin">
+                <tag2 lol= "haha"><!--Test comment-->💖Test</tag2>
+                <tag2>Test 2</tag2>
+            </tag1>"#;
+let mut reader = Reader::from_str(xml);
+reader.trim_text(true);
+let mut count = 0;
+let mut buf = Vec::new();
+let mut txt = Vec::new();
 
-    //let entry = org_parser::OrgList::parse_file(&"src/files/tracks.org".to_string())?;
+loop {
+    match reader.read_event(&mut buf) {
+        Ok(Event::Start(ref e)) => {
+            let value_vec = e.attributes().map(|a| a.unwrap().value).collect::<Vec<_>>();
+            let key_vec = e.attributes().map(|a| a.unwrap().key).collect::<Vec<_>>();
+            let count = e.attributes().count();
+            for i in 0..count {
+                let key = String::from_utf8_lossy(key_vec[i].clone());
+                let value = decode_utf8_lossy(value_vec[i].clone());
+                println!("{}: {}", key, value);
+            }
+        },            
+        Ok(Event::Text(e)) => txt.push(e.unescape_and_decode(&reader).expect("Error!")),
+        Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
+        Ok(Event::Eof) => break,
+        _ => (),
+    }
+    buf.clear();
+}
+println!("Found {} start events", count);
+println!("Text events: {:?}", txt);
     Ok(())
+}
+
+pub fn decode_utf8(input: Cow<[u8]>) -> Result<Cow<str>, str::Utf8Error> {
+    match input {
+        Cow::Borrowed(bytes) => {
+            match str::from_utf8(bytes) {
+                Ok(s) => Ok(s.into()),
+                Err(e) => Err(e),
+            }
+        }
+        Cow::Owned(bytes) => {
+            match String::from_utf8(bytes) {
+                Ok(s) => Ok(s.into()),
+                Err(e) => Err(e.utf8_error()),
+            }
+        }
+    }
+}
+
+pub fn decode_utf8_lossy(input: Cow<[u8]>) -> Cow<str> {
+    match input {
+        Cow::Borrowed(bytes) => String::from_utf8_lossy(bytes),
+        Cow::Owned(bytes) => {
+            match String::from_utf8_lossy(&bytes) {
+                Cow::Borrowed(_) => unsafe { String::from_utf8_unchecked(bytes) }.into(),
+                Cow::Owned(s) => s.into(),
+            }
+        }
+    }
 }
 
 fn write_files_from_list() -> io::Result<()> {
@@ -77,6 +129,7 @@ fn check_files(path: &str) -> io::Result<()> {
     let folders = fs::read_dir(path)?;
     let mut count = 0;
     println!("---------------------------- file length > {} ------------------------", MAX_FILE_NAME_LEN);
+    let mut entry_list = org_parser::OrgList::new();
     for folder in folders {
         let folder_path: String = folder.unwrap().path().display().to_string();
         //println!("Name: {}", path);
@@ -85,12 +138,14 @@ fn check_files(path: &str) -> io::Result<()> {
             let file_name = get_file_name(file)?;
             if file_name.len() > MAX_FILE_NAME_LEN {
                 println!("Name: {}", file_name);
-                get_name_parts(&file_name)?;
+                let entry = get_new_org_entry(&file_name)?;
+                entry_list.add(entry);
                 count += 1;
             }
         }
     }
     println!("Count {}; ", count);
+    entry_list.write_file();
     Ok(())
 }
 
@@ -108,10 +163,11 @@ fn get_file_name(file: Result<DirEntry, Error>) -> io::Result<String> {
         Some(x) => x,
         None => return Err(Error::new(ErrorKind::InvalidData, "Can not convert path to UTF-8 string")),
     };
+
     Ok(file_name.to_string())
 }
 
-fn get_name_parts(file_name: &String) -> io::Result<()> {
+fn get_new_org_entry(file_name: &String) -> io::Result<OrgEntry> {
     let author_pos = get_author_name_pos(file_name)?;
     let version_pos = get_version_name_pos(file_name)?;
     let author;
@@ -140,8 +196,14 @@ fn get_name_parts(file_name: &String) -> io::Result<()> {
     shorter_name.push_str(" - ");
     shorter_name.push_str(shorter_title(&title.to_string()).as_str());
     shorter_name.push_str(shorter_version(&version.to_string()).as_str());
-    println!("shorter_name: {}", shorter_name);
-    Ok(())
+
+    let mut entry = OrgEntry::new();
+    entry.name = shorter_name;
+    entry.author = author.to_string();
+    entry.title = title.to_string();
+    entry.version = version.to_string();
+    //println!("shorter_name: {}", shorter_name);
+    Ok(entry)
 }
 
 fn get_author_name_pos(file_name: &String) -> io::Result<usize> {
