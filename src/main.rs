@@ -1,6 +1,7 @@
 mod org_parser;
 use org_parser::OrgEntry;
 mod string_traits;
+mod xml_obj;
 use string_traits::StringUtils;
 use std::io;
 use std::io::prelude::*;
@@ -9,11 +10,9 @@ use std::fs;
 use std::fs::{File, DirEntry};
 use std::path::Path;
 use std::str;
-use std::borrow::Cow;
+use xml_obj::XmlDoc;
 
-extern crate quick_xml;
-use quick_xml::Reader;
-use quick_xml::events::Event;
+
 //Const Settings
 const GENERATE_DATA: bool = false;
 const TRACK_LIST_PATH: &str = "src/files/tracks-sample.txt";
@@ -34,67 +33,9 @@ fn main() -> io::Result<()> {
         println!("Rename files and check length");
         check_files(FILE_DIR)?; //rename_files 
     }
-let xml = r#"<tag1 att1 = "Moin">
-                <tag2 lol= "haha"><!--Test comment-->💖Test</tag2>
-                <tag2>Test 2</tag2>
-            </tag1>"#;
-let mut reader = Reader::from_str(xml);
-reader.trim_text(true);
-let mut count = 0;
-let mut buf = Vec::new();
-let mut txt = Vec::new();
-
-loop {
-    match reader.read_event(&mut buf) {
-        Ok(Event::Start(ref e)) => {
-            let value_vec = e.attributes().map(|a| a.unwrap().value).collect::<Vec<_>>();
-            let key_vec = e.attributes().map(|a| a.unwrap().key).collect::<Vec<_>>();
-            let count = e.attributes().count();
-            for i in 0..count {
-                let key = String::from_utf8_lossy(key_vec[i].clone());
-                let value = decode_utf8_lossy(value_vec[i].clone());
-                println!("{}: {}", key, value);
-            }
-        },            
-        Ok(Event::Text(e)) => txt.push(e.unescape_and_decode(&reader).expect("Error!")),
-        Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
-        Ok(Event::Eof) => break,
-        _ => (),
-    }
-    buf.clear();
-}
-println!("Found {} start events", count);
-println!("Text events: {:?}", txt);
+    let mut xml = XmlDoc::new();
+    xml.parse();
     Ok(())
-}
-
-pub fn decode_utf8(input: Cow<[u8]>) -> Result<Cow<str>, str::Utf8Error> {
-    match input {
-        Cow::Borrowed(bytes) => {
-            match str::from_utf8(bytes) {
-                Ok(s) => Ok(s.into()),
-                Err(e) => Err(e),
-            }
-        }
-        Cow::Owned(bytes) => {
-            match String::from_utf8(bytes) {
-                Ok(s) => Ok(s.into()),
-                Err(e) => Err(e.utf8_error()),
-            }
-        }
-    }
-}
-
-pub fn decode_utf8_lossy(input: Cow<[u8]>) -> Cow<str> {
-    match input {
-        Cow::Borrowed(bytes) => String::from_utf8_lossy(bytes),
-        Cow::Owned(bytes) => {
-            match String::from_utf8_lossy(&bytes) {
-                Cow::Borrowed(_) => unsafe { String::from_utf8_unchecked(bytes) }.into(),
-                Cow::Owned(s) => s.into(),
-            }
-        }
-    }
 }
 
 fn write_files_from_list() -> io::Result<()> {

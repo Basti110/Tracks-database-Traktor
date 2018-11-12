@@ -3,6 +3,7 @@ use std::io::BufReader;
 use std::fs::File;
 use std::io::prelude::*;
 
+
 pub struct OrgEntry {
     pub name: String,
     pub author: String,

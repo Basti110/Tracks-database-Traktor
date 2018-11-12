@@ -1,5 +1,5 @@
 use std::io;
-use std::io::{Error, ErrorKind, BufReader};
+use std::io::{Error, ErrorKind};
 
 pub trait StringUtils {
     //char position
