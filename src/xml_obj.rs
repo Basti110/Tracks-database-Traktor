@@ -103,6 +103,7 @@ impl XmlDoc {
                     if count < 0 {
                         break;
                     }
+                    let name = str::from_utf8(e.name()).clone();
                     let mut new_tag = XmlTag::add_empty_child(tag);
                     XmlDoc::add_attributes(e, Rc::clone(&new_tag));
                     tag = Rc::clone(&new_tag);
