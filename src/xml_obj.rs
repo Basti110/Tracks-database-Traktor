@@ -19,9 +19,14 @@ impl Attribute {
             value: value,
         }
     }
+
+    pub fn to_string(&self) -> String {
+        return format!("{}={} ", self.key, self.value);
+    }
 }
 
 pub struct XmlTag {
+    pub name: String,
     pub attributes: RefCell<Vec<Attribute>>,
     pub childs: RefCell<Vec<Rc<XmlTag>>>,
     pub parent: RefCell<Weak<XmlTag>>,
@@ -31,6 +36,7 @@ pub struct XmlTag {
 impl XmlTag {
     pub fn new() -> XmlTag {
         XmlTag {
+            name: "".to_string(),
             attributes: RefCell::new(Vec::new()),
             childs: RefCell::new(vec![]),
             parent: RefCell::new(Weak::new()),
@@ -43,6 +49,20 @@ impl XmlTag {
         *tag.parent.borrow_mut() = Rc::downgrade(&parent);
         parent.childs.borrow_mut().push(Rc::clone(&tag));
         return tag;
+    }
+
+    pub fn to_string(&self) -> String {
+        let mut string = "".to_string();
+
+        for attr in &(*self.attributes.borrow_mut()) {
+            string.push_str(attr.to_string().as_str());
+        }
+
+        for tag in &(*self.childs.borrow_mut()) {
+            string.push_str("\n");
+            string.push_str(tag.to_string().as_str());
+        }
+        return string;
     }
 }
 
@@ -95,12 +115,13 @@ impl XmlDoc {
             }
             buf.clear();
         }
+
+        println!("{}", xml_doc.write());
         return xml_doc;
     }
 
-    pub fn write(&mut self) -> String {
-        
-        return "test".to_string();
+    pub fn write(&self) -> String {
+        return self.start.borrow_mut().to_string();
     }
 
     fn add_attributes(e: BytesStart, tag: Rc<XmlTag>) {
