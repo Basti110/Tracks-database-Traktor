@@ -95,7 +95,9 @@ impl XmlDoc {
                         <tag2 lol= "haha"><!--Test comment-->💖Test</tag2>
                         <tag2>Test 2</tag2>
                     </tag1>"#;
-        let mut reader = Reader::from_str(xml);
+        let src: &[u8] = include_bytes!("files/collection.nml");
+        //let mut reader = Reader::from_str(xml);
+        let mut reader = Reader::from_reader(src);
         reader.trim_text(true);
 
         let mut buf = Vec::new();
