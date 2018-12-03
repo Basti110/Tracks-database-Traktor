@@ -13,6 +13,7 @@ use std::fs::{File, DirEntry};
 use std::path::Path;
 use std::str;
 use xml_obj::XmlDoc;
+use std::time::{Duration, Instant};
 
 
 //Const Settings
@@ -22,6 +23,7 @@ const FILE_DIR: &str = "files/";
 const MAX_FILE_NAME_LEN: usize = 80;
 static SEPARATE_AUTHOR: &'static [&str] = &["feat", "ft", "presents", "pres", "with", "introduce"];
 static SEPARATE_VERSION: &'static [&str] = &["Remix", "Mix", "Dub"];
+
 
 fn main() -> io::Result<()> {
     if GENERATE_DATA {
@@ -37,6 +39,11 @@ fn main() -> io::Result<()> {
     }
     let mut xml = XmlDoc::new();
     xml.parse();
+    // let now = Instant::now();
+    // let output = xml.find_file(&"MANDY vs Booka Shade - Body Language (Tocadisco Remix).wav".to_string());
+    // println!("output: {}", output);
+    // let dur = now.elapsed();
+    // println!("Find Time: {}.{}.{} sek.", dur.as_secs(), dur.subsec_millis(), dur.subsec_micros());
     Ok(())
 }
 
