@@ -1,3 +1,5 @@
+#[macro_use]
+pub mod utils;
 mod org_parser;
 use org_parser::OrgEntry;
 mod string_traits;

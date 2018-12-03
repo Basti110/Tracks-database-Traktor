@@ -7,6 +7,9 @@ use xml_obj::quick_xml::events::BytesStart;
 use std::borrow::Cow;
 use std::str;
 use std::time::{Duration, Instant};
+use std::fs;
+use std::fs::{File};
+use std::io::prelude::*;
 
 pub struct Attribute {
     pub key: String,
@@ -22,70 +25,79 @@ impl Attribute {
     }
 
     pub fn to_string(&self) -> String {
+        //println!(" {}=\"{}\"", self.key, self.value);
         return format!(" {}=\"{}\"", self.key, self.value);
     }
 }
 
 pub struct XmlTag {
-    pub name: RefCell<String>,
-    pub attributes: RefCell<Vec<Attribute>>,
-    pub childs: RefCell<Vec<Rc<XmlTag>>>,
-    pub count: RefCell<usize>,
-    pub parent: RefCell<Weak<XmlTag>>,
+    pub name: String,
+    pub attributes: Vec<Attribute>,
+    pub childs: Vec<Rc<RefCell<XmlTag>>>,
+    pub count: usize,
+    pub parent: Weak<RefCell<XmlTag>>,
     pub text: String,
 }
 
 impl XmlTag {
     pub fn new() -> XmlTag {
         XmlTag {
-            name: RefCell::new("".to_string()),
-            attributes: RefCell::new(Vec::new()),
-            childs: RefCell::new(vec![]),
-            count: RefCell::new(0),
-            parent: RefCell::new(Weak::new()),
+            name: "".to_string(),
+            attributes: Vec::new(),
+            childs: vec![],
+            count: 0,
+            parent: Weak::new(),
             text: "".to_string(),
         }
     }
 
-    pub fn add_empty_child(parent: Rc<XmlTag>) -> Rc<XmlTag> {
-        let tag = Rc::new(XmlTag::new());
-        *tag.parent.borrow_mut() = Rc::downgrade(&parent);
-        parent.childs.borrow_mut().push(Rc::clone(&tag));
-        *parent.count.borrow_mut() += 1;
+    pub fn add_empty_child(parent: Rc<RefCell<XmlTag>>) -> Rc<RefCell<XmlTag>> {
+        let tag = Rc::new(RefCell::new(XmlTag::new()));
+        value!(parent).childs.push(Rc::clone(&tag));
+        value!(parent).count += 1;
+        //let new_ref = Rc::new(parent);
+        value!(tag).parent = Rc::downgrade(&parent);
         return tag;
     }
 
-    pub fn to_string(&self) -> String {
+    pub fn to_string_start(&mut self) -> String {
         let mut string = "".to_string();
-        string.push_str(format!("<{}", self.name.borrow_mut()).as_str());
-        for attr in &(*self.attributes.borrow_mut()) {
+        for tag in &self.childs {
+            string.push_str(value!(tag).to_string().as_str());
+        }
+        return string;
+    }
+
+    pub fn to_string(&mut self) -> String {
+        let mut string = "".to_string();
+        string.push_str(format!("<{}", self.name).as_str());
+        //println!("{}", &(*self.attributes.borrow_mut()));
+        for attr in &self.attributes {
             string.push_str(attr.to_string().as_str());
         }
         string.push_str(">");
         let mut first = true;
-        for tag in &(*self.childs.borrow_mut()) {
+        for tag in &self.childs {
             if first {
                 string.push_str("\n");
                 first = false;
             }
-            string.push_str(tag.to_string().as_str());
+            string.push_str(value!(tag).to_string().as_str());
             string.push_str("\n");
         }
-        string.push_str(format!("</{}>", self.name.borrow_mut()).as_str());
+        string.push_str(format!("</{}>", self.name).as_str());
         return string;
     }
 }
 
 pub struct XmlDoc {
-    pub start: RefCell<Rc<XmlTag>>,
+    pub start: Rc<RefCell<XmlTag>>,
 }
 
 impl XmlDoc {
-    
     pub fn new() -> XmlDoc {
-        let vec: Vec<Rc<XmlTag>> = Vec::new();
         XmlDoc {
-            start: RefCell::new(Rc::new(XmlTag::new())),
+            start: Rc::new(RefCell::new(XmlTag::new())),
         }
     }
 
@@ -104,10 +116,10 @@ impl XmlDoc {
         let mut txt = Vec::new();
         
         let tag = XmlTag::new();//Rc<XmlTag>
-        let mut tag = Rc::new(tag); 
+        let mut tag = Rc::new(RefCell::new(tag)); 
 
         let xml_doc = XmlDoc {
-            start: RefCell::new(Rc::clone(&tag)),
+            start: Rc::clone(&tag),
         };
         let mut count = 0;
         loop {
@@ -116,11 +128,11 @@ impl XmlDoc {
                     if count < 0 {
                         continue;
                     }
-                    let mut new_tag = XmlTag::add_empty_child(tag);
+                    let mut new_tag = XmlTag::add_empty_child(Rc::clone(&tag));
                     let mut name = BytesStart::owned_name(e.name());
                     let mut name = name.name();
                     let mut name = str::from_utf8(name).unwrap().to_string(); //Handle unwrap
-                    *new_tag.name.borrow_mut() = name;
+                    value!(new_tag).name = name;
                     //(*Rc::get_mut(&mut (*parent.childs.borrow_mut()).last()).unwrap()).name = name;
                     //new_tag.name = "test".to_string();
                     XmlDoc::add_attributes(e, Rc::clone(&new_tag));
@@ -130,8 +142,14 @@ impl XmlDoc {
                 Ok(Event::End(e)) => {
                     if count > 0 {
                         count -= 1;
-                        let test = (*tag.parent.borrow_mut()).clone();
-                        tag = test.upgrade().unwrap();
+                        let strong = value!(tag).parent.upgrade().unwrap();
+                        // let strong = match strong {
+                        //     Some(x) => x,
+                        //     None => return None,
+                        // };
+                        tag = Rc::clone(&strong);
+                        //let test = value!(tag).parent.clone();
+                        //tag = test.upgrade().unwrap();
                     }
                 },
                 Ok(Event::Text(e)) => txt.push(e.unescape_and_decode(&reader).expect("Error!")),
@@ -143,8 +161,25 @@ impl XmlDoc {
         }
 
         //println!("{}", xml_doc.write());
+
+        
+
         let dur = now.elapsed();
-        println!("Time: {}.{}.{} sek.", dur.as_secs(), dur.subsec_millis(), dur.subsec_micros());
+        println!("Read Time: {}.{}.{} sek.", dur.as_secs(), dur.subsec_millis(), dur.subsec_micros());
+        
+        let mut file = match File::create("foo.txt") {
+            Err(e) => { 
+                println!("Can not create file");
+                return xml_doc;
+            },
+            Ok(x) => x,
+        };
+
+        let now = Instant::now();
+        file.write_all(xml_doc.write().as_bytes());
+        let dur = now.elapsed();
+        println!("Write Time: {}.{}.{} sek.", dur.as_secs(), dur.subsec_millis(), dur.subsec_micros());
+
         return xml_doc;
     }
 
@@ -152,18 +187,18 @@ impl XmlDoc {
         return self.start.borrow_mut().to_string();
     }
 
-    fn add_attributes(e: BytesStart, tag: Rc<XmlTag>) {
+    fn add_attributes(e: BytesStart, tag: Rc<RefCell<XmlTag>>) {
         let value_vec = e.attributes().map(|a| a.unwrap().value).collect::<Vec<_>>();
         let key_vec = e.attributes().map(|a| a.unwrap().key).collect::<Vec<_>>();
         let count = e.attributes().count();
         for i in 0..count {
             let key = String::from_utf8_lossy(key_vec[i].clone());
             let value = decode_utf8_lossy(value_vec[i].clone());
-            println!("{}: {}", key, value);
+            //println!("{}: {}", key, value);
             let key = format!("{}", key);
             let value = format!("{}", value);
             let attribute = Attribute::new(key, value);
-            tag.attributes.borrow_mut().push(attribute);
+            value!(tag).attributes.push(attribute);
         }
     }
 }
