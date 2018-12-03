@@ -1,5 +1,6 @@
 rls/
 target/
 files/
+foo.txt
 hello.exe
 hello.pdb
