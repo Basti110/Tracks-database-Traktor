@@ -1,9 +1,10 @@
 #[macro_use]
 pub mod utils;
-mod org_parser;
-use org_parser::OrgEntry;
-mod string_traits;
-mod xml_obj;
+pub mod org_parser;
+pub mod string_traits;
+pub mod xml_obj;
+pub mod manager;
+use org_parser::{OrgEntry, OrgList};
 use string_traits::StringUtils;
 use std::io;
 use std::io::prelude::*;
@@ -37,13 +38,15 @@ fn main() -> io::Result<()> {
         println!("Rename files and check length");
         check_files(FILE_DIR)?; //rename_files 
     }
-    let mut xml = XmlDoc::new();
-    xml.parse();
-    // let now = Instant::now();
-    // let output = xml.find_file(&"MANDY vs Booka Shade - Body Language (Tocadisco Remix).wav".to_string());
-    // println!("output: {}", output);
-    // let dur = now.elapsed();
-    // println!("Find Time: {}.{}.{} sek.", dur.as_secs(), dur.subsec_millis(), dur.subsec_micros());
+    //let mut xml = XmlDoc::new();
+    let mut org = OrgList::parse_file(&"files/collection.nml".to_string());
+    let mut xml = XmlDoc::parse(&"test".to_string());
+    println!("second Round");
+    let now = Instant::now();
+    //let output = xml.find_file(&"MANDY vs Booka Shade - Body Language (Tocadisco Remix).wav".to_string());
+    //println!("output: {}", output);
+    let dur = now.elapsed();
+    println!("Find Time: {}.{}.{} sek.", dur.as_secs(), dur.subsec_millis(), dur.subsec_micros());
     Ok(())
 }
 

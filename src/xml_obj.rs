@@ -8,6 +8,8 @@ use std::borrow::Cow;
 use std::str;
 use std::time::{Duration, Instant};
 use std::fs;
+use std::io;
+use std::io::{Error, ErrorKind};
 use std::fs::{File};
 use std::io::prelude::*;
 
@@ -129,12 +131,8 @@ impl XmlDoc {
         }
     }
 
-    pub fn parse(&mut self) -> XmlDoc {
+    pub fn parse(path: &String) -> io::Result<XmlDoc> {
         let now = Instant::now();
-        let xml = r#"<tag1 att1 = "Moin">
-                        <tag2 lol= "haha"><!--Test comment-->💖Test</tag2>
-                        <tag2>Test 2</tag2>
-                    </tag1>"#;
         let src: &[u8] = include_bytes!("files/collection.nml");
         //let mut reader = Reader::from_str(xml);
         let mut reader = Reader::from_reader(src);
@@ -179,9 +177,14 @@ impl XmlDoc {
                         //let test = value!(tag).parent.clone();
                         //tag = test.upgrade().unwrap();
                     }
+                    else {
+                        return Err(Error::new(ErrorKind::InvalidData, "To much close Tags"));
+                    }
                 },
                 Ok(Event::Text(e)) => txt.push(e.unescape_and_decode(&reader).expect("Error!")),
-                Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
+                Err(e) =>return Err(Error::new(ErrorKind::InvalidData, format!("Error at position {}: {:?}", 
+                    reader.buffer_position(), 
+                    e))),
                 Ok(Event::Eof) => break,
                 _ => (),
             }
@@ -198,7 +201,7 @@ impl XmlDoc {
         let mut file = match File::create("foo.txt") {
             Err(e) => { 
                 println!("Can not create file");
-                return xml_doc;
+                return Ok(xml_doc);
             },
             Ok(x) => x,
         };
@@ -214,7 +217,7 @@ impl XmlDoc {
         let dur = now.elapsed();
         println!("Find Time: {}.{}.{} sek.", dur.as_secs(), dur.subsec_millis(), dur.subsec_micros());
 
-        return xml_doc;
+        return Ok(xml_doc);
     }
 
     pub fn write(&self) -> String {
