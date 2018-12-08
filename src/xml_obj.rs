@@ -91,7 +91,7 @@ impl XmlTag {
         return string;
     }
 
-    pub fn find_file(&self, name: &String) -> String {
+    pub fn find_file(&self, tag: Rc<RefCell<XmlTag>>, name: &String) -> Option<Rc<RefCell<XmlTag>>> {
         let mut string = "".to_string();
         //string.push_str(format!("<{}", self.name).as_str());
         //println!("{}", &(*self.attributes.borrow_mut()));
@@ -101,22 +101,21 @@ impl XmlTag {
             for attr in &self.attributes {
                 if attr.key == "FILE".to_string() && attr.value == *name {
                     println!("{}", attr.value);
-                    return "found".to_string();
+                    return Some(Rc::clone(&tag));
                 }
             }
         }
         
         //println!("Tag find file 3"); 
-        for tag in &self.childs {
+        for t in &self.childs {
             //println!("loop"); 
-            let found = value!(tag).find_file(&name);
-            if(found != "".to_string()) {
-                //println!("Tag find file 2"); 
+            let found = self.find_file(Rc::clone(&tag), &name);
+            if(found.is_some()) {
                 return found;
             }
         }
-        //println!("return find file"); 
-        return string;
+
+        return None;
     }
 }
 
@@ -212,8 +211,8 @@ impl XmlDoc {
         println!("Write Time: {}.{}.{} sek.", dur.as_secs(), dur.subsec_millis(), dur.subsec_micros());
 
         let now = Instant::now();
-        let output = xml_doc.find_file(&"MANDY vs Booka Shade - Body Language (Tocadisco Remix).wav".to_string());
-        println!("output: {}", output);
+        //let output = xml_doc.find_file(&"MANDY vs Booka Shade - Body Language (Tocadisco Remix).wav".to_string());
+        //println!("output: {}", output);
         let dur = now.elapsed();
         println!("Find Time: {}.{}.{} sek.", dur.as_secs(), dur.subsec_millis(), dur.subsec_micros());
 
@@ -224,8 +223,8 @@ impl XmlDoc {
         return self.start.borrow_mut().to_string();
     }
 
-    pub fn find_file(&self, name: &String) -> String {
-        return self.start.borrow_mut().find_file(&name);
+    pub fn find_file(&self, name: &String) -> Option<Rc<RefCell<XmlTag>>> {
+        return self.start.borrow_mut().find_file(Rc::clone(&self.start), &name);
     }
 
     fn add_attributes(e: BytesStart, tag: Rc<RefCell<XmlTag>>) {

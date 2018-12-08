@@ -2,7 +2,8 @@ use std::io;
 use std::io::BufReader;
 use std::fs::File;
 use std::io::prelude::*;
-
+use std::rc::Rc;
+use std::cell::RefCell;
 
 pub struct OrgEntry {
     pub name: String,
@@ -82,18 +83,31 @@ impl OrgEntry {
 }
 
 pub struct OrgList {
-    orgs: Vec<OrgEntry>,
+    pub orgs: Vec<OrgEntry>,
+    count: usize,
 }
 
 impl OrgList {
     pub fn new() -> OrgList {
         OrgList {
             orgs: Vec::new(),
+            count: 0,
         }
     }
-    pub fn add(&mut self, value: OrgEntry) {
+    
+    pub fn add(&mut self, value: OrgEntry) -> usize {
         self.orgs.push(value);
+        self.count += 1;
+        return self.count;
     }
+
+    // pub fn get(&mut self, index: usize) -> Option<&mut OrgEntry> {
+    //     if index >= self.count {
+    //         return None;
+    //     }
+    //     return Some(&mut self.orgs[index]);
+    // }
+
 
     pub fn write_file(&self) {
         for entry in &self.orgs {
@@ -186,18 +200,18 @@ impl OrgList {
         Ok(orgList)
     }
 
-    pub fn find_entry(&mut self, name: String) -> Option<&mut OrgEntry> {
+    pub fn find_entry(&mut self, name: &String) -> Option<usize> {
         let mut count = 0;
         let mut found = false;
         for mut entry in &self.orgs {
-            if entry.name == name {
+            if entry.name == *name {
                 found = true;
                 break;
             }
             count += 1;
         }
         if found {
-            return Some(&mut self.orgs[count]);
+            return Some(count);
         }
         None
     }
