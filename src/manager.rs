@@ -1,9 +1,10 @@
 use org_parser::{OrgEntry, OrgList};
 use xml_obj::{XmlDoc, XmlTag};
-use std::io;
 use std::fs;
 use std::fs::{File, DirEntry};
+use std::io;
 use std::io::{Error, ErrorKind};
+use std::path::{Path, PathBuf};
 use string_traits::StringUtils;
 use std::rc::Rc;
 use std::cell::RefCell;
@@ -80,12 +81,46 @@ impl Manager {
         //return Ok(());
     }
 
-    pub fn rename(&self, org_idx: usize, xml: Option<Rc<RefCell<XmlTag>>>, file: Result<DirEntry, Error>) -> io::Result<()>{
-        let file_name = Manager::get_file_name(file)?;
-        let author_pos = get_author_name_pos(&file_name)?;
-        let version_pos = get_version_name_pos(&file_name)?;
-        //(self.org).orgs[org_idx]
+    pub fn rename(&mut self, org_idx: usize, xml: Option<Rc<RefCell<XmlTag>>>, path: &String, info: &FileInfo) -> io::Result<()>{
+        // Rename Path
+        let old_path = format!("{}{}", &path, info.name);
+        let new_path = format!("{}{}", &path, info.short_name);
+        fs::rename(old_path, new_path)?;
+
+        //Rename Org 
+        (self.org).orgs[org_idx].name = info.short_name.clone();
+
+        //Rename NML
+        if xml.is_some() {
+            let xml_ref = xml.unwrap();
+            if value!(xml_ref).name != "LOCATION".to_string() {
+                for mut attr in value!(xml_ref).attributes.iter_mut() {
+                    if attr.key == "FILE".to_string() {
+                        attr.value = info.short_name.clone();
+                    }
+                }
+            }
+        }
+        
         return Err(Error::new(ErrorKind::NotFound, "Error"));
+    }
+
+    pub fn get_path(file: Result<DirEntry, Error>) -> io::Result<String> {
+        let path = file;
+        let path = match path {
+            Ok(t)  => t.path(),
+            Err(e) => return Err(e.into()),
+        };
+        let path = match path.parent() {
+            Some(x) => x, 
+            None => Path::new("/"), 
+        };
+        let path = match path.to_str() {
+            Some(x) => x,
+            None => return Err(Error::new(ErrorKind::NotFound, "File path terminates with ..")),
+        };
+
+        Ok(path.to_string())
     }
 
     pub fn get_file_name(file: Result<DirEntry, Error>) -> io::Result<String> {
@@ -293,7 +328,9 @@ pub struct FileInfo {
     pub name: String,
     pub short_name: String,
     pub author: String,
+    pub author_add: String,
     pub title: String,
+    pub title_add: String,
     pub version: String,
 }
 
@@ -303,7 +340,9 @@ impl FileInfo {
             name: "".to_string(),
             short_name: "".to_string(),
             author: "".to_string(),
+            author_add: "".to_string(),
             title: "".to_string(),
+            title_add: "".to_string(),
             version: "".to_string(),
         }
     }
