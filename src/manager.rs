@@ -52,19 +52,21 @@ impl Manager {
             let files = fs::read_dir(folder_path)?;
             for file in files { 
                 let file_name = Manager::get_file_name(file)?;
+                let info = self.get_file_information(file_name)?;
 
-                let index: usize = match (self.org).find_entry(&file_name) {
+                let index: usize = match (self.org).find_entry(&info.name) {
                     Some(x) => x,
-                    None => self.get_new_org_entry(&file_name)?,
+                    None => self.get_new_org_entry(&info)?,
                 };
  
-                (self.org).orgs[index].name = "".to_string();
-                let xml = self.xml.find_file(&file_name);
+                //(self.org).orgs[index].name = "".to_string();
+                let xml = self.xml.find_file(&info.name);
+                
                 //self.rename();
                 //self.
                 //entry!(index).name = "".to_string();
 
-                if file_name.len() > max_size {
+                if info.name.len() > max_size {
                     //println!("Name: {}", file_name);
                     //let entry = Manager::get_new_org_entry(&file_name)?;
                     //&self.org.add(entry);
@@ -143,47 +145,16 @@ impl Manager {
         return Ok(info);
     }
 
-    fn get_new_org_entry(&mut self, file_name: &String) -> io::Result<usize> {
-        let author_pos = get_author_name_pos(file_name)?;
-        let version_pos = get_version_name_pos(file_name)?;
-        let author;
-        let title;
-        let mut version;
-        let mut offset = " - ".len();
-        unsafe {
-            author = file_name.get_unchecked(0..author_pos);
-            title = file_name.get_unchecked(author_pos + offset..version_pos);
-            version = file_name.get_unchecked(version_pos..file_name.len());
-        }
-        let extension_pos = version.to_string().rfind_result(").")?;
-        offset = ")".len();
-        unsafe {
-            version = version.get_unchecked(0..extension_pos + offset);
-        }
-
-        // println!("author: {}", author);
-        // println!("author short: {}", shorter_author(&author.to_string()));
-        // println!("title: {}", title);
-        // println!("title short: {}", shorter_title(&title.to_string()));
-        // println!("version: {}", version);
-        // println!("version shorter: {}", shorter_version(&version.to_string()));
-
-        let mut shorter_name = shorter_author(&author.to_string());
-        shorter_name.push_str(" - ");
-        shorter_name.push_str(shorter_title(&title.to_string()).as_str());
-        shorter_name.push_str(shorter_version(&version.to_string()).as_str());
-
+    fn get_new_org_entry(&mut self, info: &FileInfo) -> io::Result<usize> {
         let mut entry = OrgEntry::new();
-        entry.name = shorter_name;
-        entry.author = author.to_string();
-        entry.title = title.to_string();
-        entry.version = version.to_string();
+        entry.name = info.short_name.clone();
+        entry.author = info.author.clone();
+        entry.title = info.title.clone();
+        entry.version = info.version.clone();
         //println!("shorter_name: {}", shorter_name);
         Ok(self.org.add(entry))
     }
 }
-
-
 
 fn shorter_author(author: &String) -> String {
     let len = SEPARATE_AUTHOR.len();
