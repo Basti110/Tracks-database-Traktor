@@ -15,11 +15,12 @@ use std::path::Path;
 use std::str;
 use xml_obj::XmlDoc;
 use std::time::{Duration, Instant};
+use manager::Manager;
 
 
 //Const Settings
 const GENERATE_DATA: bool = false;
-const TRACK_LIST_PATH: &str = "src/files/tracks-sample.txt";
+const TRACK_LIST_PATH: &str = "src/files/tracks-sample-mini.txt";
 const FILE_DIR: &str = "files/";
 const MAX_FILE_NAME_LEN: usize = 80;
 static SEPARATE_AUTHOR: &'static [&str] = &["feat", "ft", "presents", "pres", "with", "introduce"];
@@ -35,26 +36,30 @@ fn main() -> io::Result<()> {
         write_files_from_list()?;
         println!("Move mp3 and m4a to the right year");
         sort_mp3_m4a(FILE_DIR)?;
-        println!("Rename files and check length");
-        check_files(FILE_DIR)?; //rename_files 
+        //println!("Rename files and check length");
+        //check_files(FILE_DIR)?; //rename_files 
     }
-    //let mut xml = XmlDoc::new();
-    let mut org = OrgList::parse_file(&"files/collection.nml".to_string());
-    let mut xml = XmlDoc::parse(&"test".to_string());
-    println!("second Round");
-    let now = Instant::now();
-    //let output = xml.find_file(&"MANDY vs Booka Shade - Body Language (Tocadisco Remix).wav".to_string());
-    //println!("output: {}", output);
-    let dur = now.elapsed();
-    println!("Find Time: {}.{}.{} sek.", dur.as_secs(), dur.subsec_millis(), dur.subsec_micros());
-    Ok(())
+    // //let mut xml = XmlDoc::new();
+    // //let mut org = OrgList::parse_file(&"files/collection.nml".to_string());
+    // //let mut xml = XmlDoc::parse(&"test".to_string());
+    // println!("second Round");
+    // let now = Instant::now();
+    // //let output = xml.find_file(&"MANDY vs Booka Shade - Body Language (Tocadisco Remix).wav".to_string());
+    // //println!("output: {}", output);
+    // let dur = now.elapsed();
+    // println!("Find Time: {}.{}.{} sek.", dur.as_secs(), dur.subsec_millis(), dur.subsec_micros());
+    let mut manager = match Manager::new(&"files/collection.nml".to_string(), &"files/collection.nml".to_string()) {
+        Some(x) => x,
+        None => return Err(Error::new(ErrorKind::InvalidData, "Can not Start manager")),
+    };
+    return manager.read_files(FILE_DIR.to_string(), 80);
 }
 
 fn write_files_from_list() -> io::Result<()> {
     let f = File::open(TRACK_LIST_PATH)?;
     let reader = BufReader::new(f);
     //println!("{}", "Generate files");
-    let begin = String::from("files/");
+    let begin = String::from(FILE_DIR);
     for buffer in reader.lines() {
         let line = buffer.unwrap().clone();//buffer.clone();
         let mut dirs: Vec<&str> = line.split("/").collect();

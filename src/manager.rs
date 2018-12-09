@@ -85,22 +85,25 @@ impl Manager {
         // Rename Path
         let old_path = format!("{}{}", &path, info.name);
         let new_path = format!("{}{}", &path, info.short_name);
+        println!("Rename {} to {}", old_path, new_path);
         fs::rename(old_path, new_path)?;
 
-        //Rename Org 
+        //Rename Org
+        println!("Org Entries:");
         (self.org).orgs[org_idx].name = info.short_name.clone();
+        (self.org).orgs[org_idx].to_string();
 
         //Rename NML
-        if xml.is_some() {
-            let xml_ref = xml.unwrap();
-            if value!(xml_ref).name != "LOCATION".to_string() {
-                for mut attr in value!(xml_ref).attributes.iter_mut() {
-                    if attr.key == "FILE".to_string() {
-                        attr.value = info.short_name.clone();
-                    }
-                }
-            }
-        }
+        // if xml.is_some() {
+        //     let xml_ref = xml.unwrap();
+        //     if value!(xml_ref).name != "LOCATION".to_string() {
+        //         for mut attr in value!(xml_ref).attributes.iter_mut() {
+        //             if attr.key == "FILE".to_string() {
+        //                 attr.value = info.short_name.clone();
+        //             }
+        //         }
+        //     }
+        // }
         
         return Err(Error::new(ErrorKind::NotFound, "Error"));
     }
@@ -160,12 +163,13 @@ impl Manager {
             version = version.get_unchecked(0..extension_pos + offset);
         }
 
-        // println!("author: {}", author);
-        // println!("author short: {}", shorter_author(&author.to_string()));
-        // println!("title: {}", title);
-        // println!("title short: {}", shorter_title(&title.to_string()));
-        // println!("version: {}", version);
-        // println!("version shorter: {}", shorter_version(&version.to_string()));
+        println!("File Name: {}", file_name);
+        println!("author: {}", author);
+        println!("author short: {}", shorter_author(&author.to_string()));
+        println!("title: {}", title);
+        println!("title short: {}", shorter_title(&title.to_string()));
+        println!("version: {}", version);
+        println!("version shorter: {}", shorter_version(&version.to_string()));
 
         let mut shorter_name = shorter_author(&author.to_string());
         shorter_name.push_str(" - ");
