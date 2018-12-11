@@ -9,6 +9,7 @@ use string_traits::StringUtils;
 use std::rc::Rc;
 use std::cell::RefCell;
 
+
 static SEPARATE_AUTHOR: &'static [&str] = &["feat", "ft", "presents", "pres", "with", "introduce"];
 static SEPARATE_VERSION: &'static [&str] = &["Remix", "Mix", "Dub"];
 
@@ -42,28 +43,34 @@ impl Manager {
 }
 
 impl Manager {
-    pub fn read_files(&mut self, path: String, max_size: usize) -> io::Result<()> {
+    pub fn read_files(&mut self, path: &String, max_size: usize) -> io::Result<()> {
         let folders = fs::read_dir(path)?;
         let mut count = 0;
-        println!("---------------------------- file length > {} ------------------------", max_size);
+        //println!("---------------------------- file length > {} ------------------------", max_size);
 
         for folder in folders {
             let folder_path: String = folder.unwrap().path().display().to_string();
             //println!("Name: {}", path);
-            let files = fs::read_dir(folder_path)?;
+            
+            let files = fs::read_dir(folder_path.clone())?;
             for file in files { 
                 let file_name = Manager::get_file_name(file)?;
+                println!("   ---------- new file ------------------");
                 let info = self.get_file_information(file_name)?;
-
+                println!("   ---------- search org ----------------");
                 let index: usize = match (self.org).find_entry(&info.name) {
-                    Some(x) => x,
-                    None => self.get_new_org_entry(&info)?,
+                    Some(x) => {println!("   Found"); x},
+                    None => {println!("   Not Found"); self.get_new_org_entry(&info)?},
                 };
  
                 //(self.org).orgs[index].name = "".to_string();
+                //println!("   ---------- search nml ----------------");
                 let xml = self.xml.find_file(&info.name);
-                
-                //self.rename();
+                if(xml.is_some()) {
+                    println!("   True");
+                }
+                println!("   ---------- rename file ---------------");
+                self.rename(index, xml, &folder_path, &info)?;
                 //self.
                 //entry!(index).name = "".to_string();
 
@@ -83,15 +90,17 @@ impl Manager {
 
     pub fn rename(&mut self, org_idx: usize, xml: Option<Rc<RefCell<XmlTag>>>, path: &String, info: &FileInfo) -> io::Result<()>{
         // Rename Path
-        let old_path = format!("{}{}", &path, info.name);
-        let new_path = format!("{}{}", &path, info.short_name);
+        let old_path = format!("{}{}{}", &path, "/", info.name);
+        let new_path = format!("{}{}{}", &path, "/", info.short_name);
         println!("Rename {} to {}", old_path, new_path);
-        fs::rename(old_path, new_path)?;
+        //fs::rename(old_path, new_path)?;
 
         //Rename Org
-        println!("Org Entries:");
+        println!("New Org Name:");
         (self.org).orgs[org_idx].name = info.short_name.clone();
-        (self.org).orgs[org_idx].to_string();
+        println!("Org Entries:");
+        println!("{}", (self.org).orgs[org_idx].to_string());
+        Ok(())
 
         //Rename NML
         // if xml.is_some() {
@@ -105,7 +114,7 @@ impl Manager {
         //     }
         // }
         
-        return Err(Error::new(ErrorKind::NotFound, "Error"));
+        //return Err(Error::new(ErrorKind::NotFound, "Error"));
     }
 
     pub fn get_path(file: Result<DirEntry, Error>) -> io::Result<String> {
@@ -163,18 +172,24 @@ impl Manager {
             version = version.get_unchecked(0..extension_pos + offset);
         }
 
+        let short_author = shorter_author(&author);
+        let short_title = shorter_title(&title);
+        let short_version = shorter_version(&version.to_string());
         println!("File Name: {}", file_name);
-        println!("author: {}", author);
-        println!("author short: {}", shorter_author(&author.to_string()));
-        println!("title: {}", title);
-        println!("title short: {}", shorter_title(&title.to_string()));
-        println!("version: {}", version);
-        println!("version shorter: {}", shorter_version(&version.to_string()));
+        println!("author  : {}", short_author.0.to_string());
+        println!("author+ : {}", short_author.1.to_string());
+        println!("title   : {}", short_title.0.to_string());
+        println!("title+  : {}", short_title.1.to_string());
+        println!("version : {}", short_version.0.to_string());
+        println!("version+: {}", short_version.1.to_string());
 
-        let mut shorter_name = shorter_author(&author.to_string());
+        let mut shorter_name = short_author.0.to_string();
+        if short_author.1 == "" {
+            shorter_name.push_str("_");
+        }
         shorter_name.push_str(" - ");
-        shorter_name.push_str(shorter_title(&title.to_string()).as_str());
-        shorter_name.push_str(shorter_version(&version.to_string()).as_str());
+        shorter_name.push_str(short_title.0);
+        shorter_name.push_str(short_version.0.as_str());
 
         info.short_name = shorter_name;
         info.name = file_name.clone();
@@ -195,7 +210,7 @@ impl Manager {
     }
 }
 
-fn shorter_author(author: &String) -> String {
+fn shorter_author<'a>(author: &'a str) -> (&'a str, &'a str) {
     let len = SEPARATE_AUTHOR.len();
     let mut pos: usize = 255;
     for x in 0..len {
@@ -210,31 +225,29 @@ fn shorter_author(author: &String) -> String {
         };
     } 
     if pos != 255 {
-        match author.get(0..pos) {
-            Some(x) => {
-                let mut y = x.trim().to_string();
-                y.push_str("_");
-                return y 
-            },
-            None => return author.clone(),
-        };
+        return author.split_at(pos);
     }
-    author.clone()
+
+    (author.clone(), "")
 }
 
-fn shorter_title(title: &String) -> String {
-    return remove_first_p(title);
+fn shorter_title<'a>(title: &'a str) -> (&'a str, &'a str) {
+    let first_pos = match title.find("(") {
+        Some(x) => x,
+        None => return (title.clone(), ""),
+    };
+    title.split_at(first_pos)
 }
 
-fn shorter_version(version: &String) -> String {
+fn shorter_version(version: &String) -> (String, String) {
     let first_pos = match version.find("(") {
         Some(x) => x,
-        None => return version.clone(),
+        None => return (version.clone(), "".to_string()),
     };
 
     let last_pos = match version.find(")") {
         Some(x) => x,
-        None => return version.clone(),
+        None => return (version.clone(), "".to_string()),
     };
 
     if first_pos != 0 || last_pos != version.len() - 1 {
@@ -244,14 +257,17 @@ fn shorter_version(version: &String) -> String {
     let len = SEPARATE_VERSION.len();
     for i in 0..len {
         match version.find(SEPARATE_VERSION[i]) {
-            Some(x) => return SEPARATE_VERSION[i].to_string(),
+            Some(x) => {
+                let s = format!("(Special {})", SEPARATE_VERSION[i]);
+                return (s, "".to_string());
+            },
             None => continue,
         };
     }
-    version.clone()
+    (version.clone(), "".to_string())
 }
 
-fn remove_first_p(name: &String) -> String {
+fn remove_first_p(name: &String) -> (String, String) {
     let mut open_pos: usize = 0;
     let mut close_pos: usize = 0;
     let mut found_open = false;
@@ -260,6 +276,10 @@ fn remove_first_p(name: &String) -> String {
         let mut count = 0;
         let mut char_pos: usize = 0;
         let mut chars = name.chars();
+        match chars.next() {
+                Some(x) => (),
+                None => return (name.clone(), "".to_string()),
+        };
         loop {
             let c = match chars.next() {
                 Some(x) => x,
@@ -284,9 +304,11 @@ fn remove_first_p(name: &String) -> String {
         }
     }
     if open_pos < close_pos && found_open == true {
-        return name.rsubstring(open_pos, close_pos);
+        let a = name.to_string().substring(open_pos + 1, (close_pos - open_pos) + 1); 
+        let b = name.to_string().rsubstring(open_pos, close_pos + 1);
+        return (a, b);
     }
-    name.clone()
+    (name.clone(), "".to_string())
 }
 
 fn get_version_name_pos(file_name: &String) -> io::Result<usize> {

@@ -6,3 +6,4 @@ authors = [ "Your name <you@example.com>" ]
 
 [dependencies]
 quick-xml = "0.12.0"
+regex = "1"

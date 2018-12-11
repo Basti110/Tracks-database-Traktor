@@ -4,6 +4,7 @@ pub mod org_parser;
 pub mod string_traits;
 pub mod xml_obj;
 pub mod manager;
+extern crate regex;
 use org_parser::{OrgEntry, OrgList};
 use string_traits::StringUtils;
 use std::io;
@@ -21,7 +22,7 @@ use manager::Manager;
 //Const Settings
 const GENERATE_DATA: bool = false;
 const TRACK_LIST_PATH: &str = "src/files/tracks-sample-mini.txt";
-const FILE_DIR: &str = "files/";
+const FILE_DIR: &str = "files-mini/";
 const MAX_FILE_NAME_LEN: usize = 80;
 static SEPARATE_AUTHOR: &'static [&str] = &["feat", "ft", "presents", "pres", "with", "introduce"];
 static SEPARATE_VERSION: &'static [&str] = &["Remix", "Mix", "Dub"];
@@ -34,8 +35,8 @@ fn main() -> io::Result<()> {
         }
         println!("Write files from tracks-sample.txt");
         write_files_from_list()?;
-        println!("Move mp3 and m4a to the right year");
-        sort_mp3_m4a(FILE_DIR)?;
+        //println!("Move mp3 and m4a to the right year");
+        //sort_mp3_m4a(FILE_DIR)?;
         //println!("Rename files and check length");
         //check_files(FILE_DIR)?; //rename_files 
     }
@@ -48,11 +49,14 @@ fn main() -> io::Result<()> {
     // //println!("output: {}", output);
     // let dur = now.elapsed();
     // println!("Find Time: {}.{}.{} sek.", dur.as_secs(), dur.subsec_millis(), dur.subsec_micros());
-    let mut manager = match Manager::new(&"files/collection.nml".to_string(), &"files/collection.nml".to_string()) {
+    println!("------- Start: New names ---------------");
+    println!("------- start Manager ------------------");
+    let mut manager = match Manager::new(&"src/files/tracks-mini.org".to_string(), &"src/files/collection.nml".to_string()) {
         Some(x) => x,
         None => return Err(Error::new(ErrorKind::InvalidData, "Can not Start manager")),
     };
-    return manager.read_files(FILE_DIR.to_string(), 80);
+    println!("---------- read files ------------------");
+    return manager.read_files(&FILE_DIR.to_string(), 80);
 }
 
 fn write_files_from_list() -> io::Result<()> {

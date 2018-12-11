@@ -4,6 +4,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::rc::Rc;
 use std::cell::RefCell;
+use regex::Regex;
 
 pub struct OrgEntry {
     pub name: String,
@@ -98,7 +99,7 @@ impl OrgList {
     pub fn add(&mut self, value: OrgEntry) -> usize {
         self.orgs.push(value);
         self.count += 1;
-        return self.count;
+        return self.count - 1;
     }
 
     // pub fn get(&mut self, index: usize) -> Option<&mut OrgEntry> {
@@ -118,7 +119,7 @@ impl OrgList {
     pub fn parse_file(path: &String) -> io::Result<OrgList> {
         let f = File::open(path)?;
         let mut reader = BufReader::new(f);
-        let mut orgList = OrgList::new();
+        let mut org_list = OrgList::new();
 
         //let test = reader.nex();
         let mut line = "".to_string();
@@ -133,9 +134,12 @@ impl OrgList {
             }   
             line.pop();
             if line.match_first_chars( "**".to_string()) {
+                //let re = Regex::new(r"^\d{4}-\d{2}-\d{2}$").unwrap();
+
                 line.drain(..3);
+                line.pop();
                 entry.name = line.clone();
-                //println!("Name: {}", line);
+                println!("Name new: {} : {}", line, line.len());
                 loop {
                     line = "".to_string();
                     let len2 = reader.read_line(&mut line)?;
@@ -194,16 +198,20 @@ impl OrgList {
                         println!("{}", line);
                     }
                 }
+                org_list.add(entry);
             }
         }
 
-        Ok(orgList)
+        Ok(org_list)
     }
 
     pub fn find_entry(&mut self, name: &String) -> Option<usize> {
         let mut count = 0;
         let mut found = false;
         for mut entry in &self.orgs {
+            //println!("{}: {}", entry.name, entry.name.len());
+            //println!("{}: {}", *name, (*name).len());
+            //println!("{}" ,entry.to_string());
             if entry.name == *name {
                 found = true;
                 break;

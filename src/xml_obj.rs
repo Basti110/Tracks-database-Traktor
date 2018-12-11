@@ -109,7 +109,7 @@ impl XmlTag {
         //println!("Tag find file 3"); 
         for t in &self.childs {
             //println!("loop"); 
-            let found = self.find_file(Rc::clone(&tag), &name);
+            let found = value!(t).find_file(Rc::clone(&t), &name);
             if(found.is_some()) {
                 return found;
             }
@@ -211,7 +211,10 @@ impl XmlDoc {
         println!("Write Time: {}.{}.{} sek.", dur.as_secs(), dur.subsec_millis(), dur.subsec_micros());
 
         let now = Instant::now();
-        //let output = xml_doc.find_file(&"MANDY vs Booka Shade - Body Language (Tocadisco Remix).wav".to_string());
+        // let output = xml_doc.find_file(&"MANDY vs Booka Shade - Body Language (Tocadisco Remix).wav".to_string());
+        // if(output.is_some()) {
+        //     println!("   True");
+        // }
         //println!("output: {}", output);
         let dur = now.elapsed();
         println!("Find Time: {}.{}.{} sek.", dur.as_secs(), dur.subsec_millis(), dur.subsec_micros());
