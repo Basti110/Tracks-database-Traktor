@@ -132,7 +132,7 @@ impl OrgList {
             if len == 0 {
                 break;
             }   
-            line.pop();
+            //line.pop();
             if line.match_first_chars( "**".to_string()) {
                 //let re = Regex::new(r"^\d{4}-\d{2}-\d{2}$").unwrap();
 
@@ -211,7 +211,7 @@ impl OrgList {
         for mut entry in &self.orgs {
             //println!("{}: {}", entry.name, entry.name.len());
             //println!("{}: {}", *name, (*name).len());
-            //println!("{}" ,entry.to_string());
+            println!("{}" ,entry.to_string());
             if entry.name == *name {
                 found = true;
                 break;
