@@ -20,7 +20,7 @@ use manager::Manager;
 
 
 //Const Settings
-const GENERATE_DATA: bool = true;
+const GENERATE_DATA: bool = false;
 const TRACK_LIST_PATH: &str = "src/files/tracks-sample-mini.txt";
 const FILE_DIR: &str = "files-mini/";
 const MAX_FILE_NAME_LEN: usize = 80;
@@ -36,7 +36,10 @@ fn main() -> io::Result<()> {
         println!("Write files from tracks-sample.txt");
         write_files_from_list()?;
         println!("Move mp3 and m4a to the right year");
-        sort_mp3_m4a(FILE_DIR)?;
+        match sort_mp3_m4a(FILE_DIR) {
+            Err(e) => println!("{}", e),
+            Ok(_x) => (),
+        };
         //println!("Rename files and check length");
         //check_files(FILE_DIR)?; //rename_files 
     }

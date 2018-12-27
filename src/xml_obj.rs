@@ -100,8 +100,13 @@ impl XmlTag {
         if self.name == "LOCATION".to_string() {
             for attr in &self.attributes {
                 if attr.key == "FILE".to_string() && attr.value == *name {
-                    println!("{}", attr.value);
-                    return Some(Rc::clone(&tag));
+                    //println!("{}", attr.value);
+                    let strong = &self.parent.upgrade();
+                    let strong = match strong {
+                        Some(x) => x,
+                        None => return None,
+                    };
+                    return Some(Rc::clone(&strong));
                 }
             }
         }
@@ -132,7 +137,7 @@ impl XmlDoc {
 
     pub fn parse(path: &String) -> io::Result<XmlDoc> {
         let now = Instant::now();
-        let src: &[u8] = include_bytes!("files/collection.nml");
+        let src: &[u8] = include_bytes!("files/collection-mini.nml");
         //let mut reader = Reader::from_str(xml);
         let mut reader = Reader::from_reader(src);
         reader.trim_text(true);

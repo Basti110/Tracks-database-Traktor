@@ -8,6 +8,7 @@ use std::path::{Path, PathBuf};
 use string_traits::StringUtils;
 use std::rc::Rc;
 use std::cell::RefCell;
+use std::ffi::OsStr;
 
 
 static SEPARATE_AUTHOR: &'static [&str] = &["feat", "ft", "presents", "pres", "with", "introduce"];
@@ -53,10 +54,32 @@ impl Manager {
             //println!("Name: {}", path);
             
             let files = fs::read_dir(folder_path.clone())?;
-            for file in files { 
-                let file_name = Manager::get_file_name(file)?;
+            for f in files { 
+                let file = match f {
+                    Ok(t) => t,
+                    Err(e) => return Err(e.into()),
+                };
+                let file_name = Manager::get_file_name(&file)?;
                 println!("   ---------- new file ------------------");
-                let info = self.get_file_information(file_name)?;
+                let mut info = self.get_file_information(file_name)?;
+                //let path: Box<Vec<OsStr>> = Box::new(file.unwrap().path().iter().collect());
+                println!("----Path");
+                let mut path: Vec<String> = vec![];
+                //let relative_path = file.path();
+                //let mut absolute_path = try!(std::env::current_dir());
+                //absolute_path.push(relative_path);
+                for s in file.path().iter() {
+                    match s.to_str() {
+                        Some(x) => {
+                            println!("{}", x.to_string());
+                            path.push(x.to_string());
+                        },
+                        None => println!("nope"), 
+                    }
+                }
+                path.pop();
+                println!("----Path");
+                info.path = path;
                 println!("   ---------- search org ----------------");
                 let index: usize = match (self.org).find_entry(&info.name) {
                     Some(x) => {println!("   Found"); x},
@@ -64,11 +87,12 @@ impl Manager {
                 };
  
                 //(self.org).orgs[index].name = "".to_string();
-                //println!("   ---------- search nml ----------------");
+                println!("   ---------- search nml ----------------");
                 let xml = self.xml.find_file(&info.name);
-                if(xml.is_some()) {
-                    println!("   True");
-                }
+                // match xml {
+                //     Some(x) => println!("{}", value!(x).to_string()),
+                //     None => (),
+                // };
                 println!("   ---------- rename file ---------------");
                 self.rename(index, xml, &folder_path, &info)?;
                 //self.
@@ -100,29 +124,37 @@ impl Manager {
         (self.org).orgs[org_idx].name = info.short_name.clone();
         println!("Org Entries:");
         println!("{}", (self.org).orgs[org_idx].to_string());
-        Ok(())
 
         //Rename NML
-        // if xml.is_some() {
-        //     let xml_ref = xml.unwrap();
-        //     if value!(xml_ref).name != "LOCATION".to_string() {
-        //         for mut attr in value!(xml_ref).attributes.iter_mut() {
-        //             if attr.key == "FILE".to_string() {
-        //                 attr.value = info.short_name.clone();
-        //             }
-        //         }
-        //     }
-        // }
-        
+        if xml.is_some() {
+            let xml_ref = Rc::clone(&xml.unwrap());
+            for t in &value!(xml_ref).childs {
+                if value!(t).name == "LOCATION".to_string() {
+                    for mut attr in value!(t).attributes.iter_mut() {
+                        println!("{}", attr.key);
+                        if attr.key == "FILE".to_string() {
+                            attr.value = info.short_name.clone();
+                        }
+                        if attr.key == "DIR".to_string() {
+                            let mut new_dir = "".to_string();
+                            for p in &info.path {
+                                new_dir.push_str("/:");
+                                new_dir.push_str(p.as_str());
+                            }
+                            new_dir.push_str("/:");
+                            println!("{}", new_dir);
+                            //attr.value = info.short_name.clone();
+                        }
+                    }
+                }
+            }
+        }
+        Ok(())
         //return Err(Error::new(ErrorKind::NotFound, "Error"));
     }
 
-    pub fn get_path(file: Result<DirEntry, Error>) -> io::Result<String> {
-        let path = file;
-        let path = match path {
-            Ok(t)  => t.path(),
-            Err(e) => return Err(e.into()),
-        };
+    pub fn get_path(file: &DirEntry) -> io::Result<String> {
+        let path = file.path();
         let path = match path.parent() {
             Some(x) => x, 
             None => Path::new("/"), 
@@ -135,12 +167,8 @@ impl Manager {
         Ok(path.to_string())
     }
 
-    pub fn get_file_name(file: Result<DirEntry, Error>) -> io::Result<String> {
-        let file_name = file;
-        let file_name = match file_name {
-            Ok(t)  => t.path(),
-            Err(e) => return Err(e.into()),
-        };
+    pub fn get_file_name(file: &DirEntry) -> io::Result<String> {
+        let file_name = file.path();
         let file_name = match file_name.file_name() {
             Some(x) => x,
             None => return Err(Error::new(ErrorKind::NotFound, "File path terminates with ..")),
@@ -358,6 +386,7 @@ pub struct FileInfo {
     pub title: String,
     pub title_add: String,
     pub version: String,
+    pub path: Vec<String>,
 }
 
 impl FileInfo {
@@ -370,6 +399,7 @@ impl FileInfo {
             title: "".to_string(),
             title_add: "".to_string(),
             version: "".to_string(),
+            path: vec![],
         }
     }
 }

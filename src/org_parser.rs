@@ -211,7 +211,7 @@ impl OrgList {
         for mut entry in &self.orgs {
             //println!("{}: {}", entry.name, entry.name.len());
             //println!("{}: {}", *name, (*name).len());
-            println!("{}" ,entry.to_string());
+            //println!("{}" ,entry.to_string());
             if entry.name == *name {
                 found = true;
                 break;
