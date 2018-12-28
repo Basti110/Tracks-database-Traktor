@@ -115,12 +115,26 @@ impl XmlTag {
         for t in &self.childs {
             //println!("loop"); 
             let found = value!(t).find_file(Rc::clone(&t), &name);
-            if(found.is_some()) {
+            if found.is_some() {
                 return found;
             }
         }
 
         return None;
+    }
+    
+    pub fn replace_primarykey(&mut self, key: &String, new_key: &String) -> () {
+        if self.name == "PRIMARYKEY".to_string() {
+            for mut attr in &mut self.attributes {
+                if attr.key == "KEY".to_string() && attr.value == *key {
+                    attr.value = new_key.clone();
+                }
+            }
+        }
+        
+        for t in &self.childs {
+            let found = value!(t).replace_primarykey(&key, &new_key);
+        }
     }
 }
 
