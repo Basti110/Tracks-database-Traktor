@@ -22,6 +22,7 @@ macro_rules! entry {
 pub struct Manager {
     pub org: OrgList,
     pub xml: XmlDoc,
+    pub verbose: bool,
 }
 
 impl Manager {
@@ -39,19 +40,26 @@ impl Manager {
         Some(Manager {
             org: org,
             xml: xml,
+            verbose: true,
         })
     }
 }
 
 impl Manager {
+    pub fn debug(&self, out: &str) {
+        if self.verbose {
+            println!("Manager: {}", &out);
+        }
+    }
+
     pub fn read_files(&mut self, path: &String, max_size: usize) -> io::Result<()> {
         let folders = fs::read_dir(path)?;
-        let mut count = 0;
-        //println!("---------------------------- file length > {} ------------------------", max_size);
+        let count = 0;
+        
 
         for folder in folders {
             let folder_path: String = folder.unwrap().path().display().to_string();
-            //println!("Name: {}", path);
+            println!("Name: {}", path);
             
             let files = fs::read_dir(folder_path.clone())?;
             for f in files { 
@@ -59,45 +67,44 @@ impl Manager {
                     Ok(t) => t,
                     Err(e) => return Err(e.into()),
                 };
+                println!("--- get Filename");
                 let file_name = Manager::get_file_name(&file)?;
-                println!("   ---------- new file ------------------");
+                println!("--- Filename = \"{}\"", file_name);
+                
                 let mut info = self.get_file_information(file_name)?;
-                //let path: Box<Vec<OsStr>> = Box::new(file.unwrap().path().iter().collect());
-                println!("----Path");
+
                 let mut path: Vec<String> = vec![];
                 //let relative_path = file.path();
                 //let mut absolute_path = try!(std::env::current_dir());
                 //absolute_path.push(relative_path);
                 for s in file.path().iter() {
                     match s.to_str() {
-                        Some(x) => {
-                            println!("{}", x.to_string());
-                            path.push(x.to_string());
-                        },
+                        Some(x) => println!("{}", x.to_string()),
                         None => println!("nope"), 
                     }
                 }
                 path.pop();
-                println!("----Path");
                 info.path = path;
+
                 println!("   ---------- search org ----------------");
                 let index: usize = match (self.org).find_entry(&info.name) {
                     Some(x) => {println!("   Found"); x},
-                    None => {println!("   Not Found"); self.get_new_org_entry(&info)?},
+                    None => {println!("   New Entry"); self.get_new_org_entry(&info)?},
                 };
- 
+                println!("   ---------- end search org -------------");
                 //(self.org).orgs[index].name = "".to_string();
                 println!("   ---------- search nml ----------------");
                 let xml = self.xml.find_file(&info.name);
-                // match xml {
-                //     Some(x) => println!("{}", value!(x).to_string()),
-                //     None => (),
-                // };
+                if xml.is_some() {
+                    println!("Found");
+                } 
+                else {
+                    println!("Not found");
+                }
                 println!("   ---------- rename file ---------------");
                 self.rename(index, xml, &folder_path, &info)?;
-                //self.
-                //entry!(index).name = "".to_string();
-
+                println!("   ---------- end rename file ---------------");
+                
                 if info.name.len() > max_size {
                     //println!("Name: {}", file_name);
                     //let entry = Manager::get_new_org_entry(&file_name)?;
@@ -127,27 +134,45 @@ impl Manager {
 
         //Rename NML
         if xml.is_some() {
+            let mut key = "".to_string();
+            let mut new_key = "".to_string();
             let xml_ref = Rc::clone(&xml.unwrap());
             for t in &value!(xml_ref).childs {
                 if value!(t).name == "LOCATION".to_string() {
+                    let mut volume = "".to_string();
+                    let mut dir = "".to_string();
+                    let mut file = "".to_string();
+                    let mut new_dir = "".to_string();
+
                     for mut attr in value!(t).attributes.iter_mut() {
                         println!("{}", attr.key);
                         if attr.key == "FILE".to_string() {
+                            file = attr.value.clone();
                             attr.value = info.short_name.clone();
                         }
+                        if attr.key == "VOLUME".to_string() {
+                            volume = attr.value.clone();
+                        }
                         if attr.key == "DIR".to_string() {
-                            let mut new_dir = "".to_string();
+                            dir = attr.value.clone();
+                           
                             for p in &info.path {
                                 new_dir.push_str("/:");
                                 new_dir.push_str(p.as_str());
                             }
                             new_dir.push_str("/:");
                             println!("{}", new_dir);
-                            //attr.value = info.short_name.clone();
+                            attr.value = new_dir.clone();
                         }
                     }
+                    key = volume.clone() + &dir + &file;
+                    new_key = volume + &new_dir + &info.short_name.clone();
+                    println!("Key: \"{}\"", key);
+                    println!("new Key: \"{}\"", new_key);
+                    
                 }
             }
+            value!(&self.xml.start).replace_primarykey(&key, &new_key);
         }
         Ok(())
         //return Err(Error::new(ErrorKind::NotFound, "Error"));

@@ -33,13 +33,15 @@ fn main() -> io::Result<()> {
         if !Path::new(FILE_DIR).exists() {
             fs::create_dir(FILE_DIR)?;
         }
-        println!("Write files from tracks-sample.txt");
+        println!("|--- Write files from tracks-sample.txt");
         write_files_from_list()?;
-        println!("Move mp3 and m4a to the right year");
+        println!("---| write files from tracks-sample.txt");
+        println!("|--- Move mp3 and m4a to the right year");
         match sort_mp3_m4a(FILE_DIR) {
             Err(e) => println!("{}", e),
             Ok(_x) => (),
         };
+        println!("---| move mp3 and m4a to the right year");
         //println!("Rename files and check length");
         //check_files(FILE_DIR)?; //rename_files 
     }
@@ -52,14 +54,16 @@ fn main() -> io::Result<()> {
     // //println!("output: {}", output);
     // let dur = now.elapsed();
     // println!("Find Time: {}.{}.{} sek.", dur.as_secs(), dur.subsec_millis(), dur.subsec_micros());
-    println!("------- Start: New names ---------------");
-    println!("------- start Manager ------------------");
+    //println!("------- Start: New names ---------------");
+    println!("|--- start Manager");
     let mut manager = match Manager::new(&"src/files/tracks-mini.org".to_string(), &"src/files/collection.nml".to_string()) {
         Some(x) => x,
         None => return Err(Error::new(ErrorKind::InvalidData, "Can not Start manager")),
     };
-    println!("---------- read files ------------------");
+    println!("---| start Manager");
+    println!("|--- Read Files and Update");
     return manager.read_files(&FILE_DIR.to_string(), 80);
+    println!("---| Read Files and Update");
 }
 
 fn write_files_from_list() -> io::Result<()> {

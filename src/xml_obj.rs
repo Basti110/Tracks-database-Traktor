@@ -127,6 +127,7 @@ impl XmlTag {
         if self.name == "PRIMARYKEY".to_string() {
             for mut attr in &mut self.attributes {
                 if attr.key == "KEY".to_string() && attr.value == *key {
+                    println!("Found Key :)");
                     attr.value = new_key.clone();
                 }
             }
