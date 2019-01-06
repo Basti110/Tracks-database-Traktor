@@ -53,7 +53,7 @@ impl Manager {
     }
 
     pub fn write_files(&self) -> io::Result<()> {
-        
+
         Ok(())
     }
 
@@ -76,7 +76,7 @@ impl Manager {
                 let file_name = Manager::get_file_name(&file)?;
                 println!("--- Filename = \"{}\"", file_name);
                 
-                let mut info = self.get_file_information(file_name)?;
+                let mut info = self.get_file_information(file_name, max_size)?;
 
                 let mut path: Vec<String> = vec![];
                 //let relative_path = file.path();
@@ -205,7 +205,7 @@ impl Manager {
         Ok(file_name.to_string())
     }
 
-    fn get_file_information(&mut self, file_name: String) -> io::Result<FileInfo> {
+    fn get_file_information(&mut self, file_name: String, max_size: usize) -> io::Result<FileInfo> {
         let mut info = FileInfo::new();
         let author_pos = get_author_name_pos(&file_name)?;
         let version_pos = get_version_name_pos(&file_name)?;
@@ -237,23 +237,30 @@ impl Manager {
         println!("version+ : {}", short_version.1.to_string());
         println!("Extension: {}", extension);
 
-        let mut shorter_name = short_author.0.to_string();
-        if short_author.1 == "" {
-            shorter_name.push_str("_");
+        let mut author = short_author.0.to_string();
+        if short_author.1 != "" {
+            author.push_str("_");
         }
-        shorter_name.push_str(" - ");
-        shorter_name.push_str(short_title.0);
-        shorter_name.push_str(&short_version.0);
-        shorter_name.push_str(&extension);
+
+        let mut short_name = author + " - " + short_title.0 + &short_version.0 + &extension;
+        
+        if (short_name.chars().count() > max_size) {
+
+        }
+
         println!("-- GET INITIALS");
         println!("{}", get_initials(&title.to_string()));
         println!("-- DONE GET INITIALS");
-        info.short_name = shorter_name;
+        info.short_name = short_name;
         info.name = file_name.clone();
         info.author = author.to_string();
         info.title = title.to_string();
         info.version = version.to_string();
         return Ok(info);
+    }
+
+    fn create_final_name(author: &mut String, title: &String, version: &String) -> String {
+        return author + " - " + title + version;
     }
 
     fn get_new_org_entry(&mut self, info: &FileInfo) -> io::Result<usize> {
