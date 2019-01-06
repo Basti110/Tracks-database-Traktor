@@ -52,6 +52,11 @@ impl Manager {
         }
     }
 
+    pub fn write_files(&self) -> io::Result<()> {
+        
+        Ok(())
+    }
+
     pub fn read_files(&mut self, path: &String, max_size: usize) -> io::Result<()> {
         let folders = fs::read_dir(path)?;
         let count = 0;

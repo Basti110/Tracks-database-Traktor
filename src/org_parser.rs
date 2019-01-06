@@ -2,6 +2,7 @@ use std::io;
 use std::io::BufReader;
 use std::fs::File;
 use std::io::prelude::*;
+use std::fs::OpenOptions;
 use std::rc::Rc;
 use std::cell::RefCell;
 use regex::Regex;
@@ -110,10 +111,19 @@ impl OrgList {
     // }
 
 
-    pub fn write_file(&self) {
+    pub fn write_file(&self, path: &str) -> io::Result<()> {
+        let mut file = OpenOptions::new()
+            .read(true)
+            .write(true)
+            .create(true)
+            .open(path)?;
+
         for entry in &self.orgs {
             println!("{}", entry.to_string());
+            file.write_all(entry.to_string().as_bytes())?;
         }
+        
+        Ok(())
     }
 
     pub fn parse_file(path: &String) -> io::Result<OrgList> {

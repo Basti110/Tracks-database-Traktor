@@ -9,10 +9,10 @@ use std::str;
 use std::time::{Duration, Instant};
 use std::fs;
 use std::io;
-use std::io::{Error, ErrorKind};
+use std::io::{Error, ErrorKind, BufReader};
 use std::fs::{File};
+use std::fs::OpenOptions;
 use std::io::prelude::*;
-use std::io::BufReader;
 
 pub struct Attribute {
     pub key: String,
@@ -229,7 +229,7 @@ impl XmlDoc {
         };
 
         let now = Instant::now();
-        file.write_all(xml_doc.write().as_bytes());
+        //file.write_all(xml_doc.write().as_bytes());
         let dur = now.elapsed();
         println!("Write Time: {}.{}.{} sek.", dur.as_secs(), dur.subsec_millis(), dur.subsec_micros());
 
@@ -245,8 +245,14 @@ impl XmlDoc {
         return Ok(xml_doc);
     }
 
-    pub fn write(&self) -> String {
-        return self.start.borrow_mut().to_string();
+    pub fn write(&self, path: &str) -> io::Result<()> {
+        let mut file = OpenOptions::new()
+            .read(true)
+            .write(true)
+            .create(true)
+            .open(path)?;
+        
+        return file.write_all(self.start.borrow_mut().to_string().as_bytes());
     }
 
     pub fn find_file(&self, name: &String) -> Option<Rc<RefCell<XmlTag>>> {
