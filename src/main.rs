@@ -4,7 +4,11 @@ pub mod org_parser;
 pub mod string_traits;
 pub mod xml_obj;
 pub mod manager;
+
 extern crate regex;
+extern crate clap;
+use clap::{Arg, App};
+
 use org_parser::{OrgEntry, OrgList};
 use string_traits::StringUtils;
 use std::io;
@@ -20,50 +24,68 @@ use manager::Manager;
 
 
 //Const Settings
-const GENERATE_DATA: bool = false;
+//const GENERATE_DATA: bool = false;
 const TRACK_LIST_PATH: &str = "src/files/tracks-sample-mini.txt";
 const FILE_DIR: &str = "files-mini/";
 const MAX_FILE_NAME_LEN: usize = 80;
-static SEPARATE_AUTHOR: &'static [&str] = &["feat", "ft", "presents", "pres", "with", "introduce"];
-static SEPARATE_VERSION: &'static [&str] = &["Remix", "Mix", "Dub"];
-
 
 fn main() -> io::Result<()> {
-    if GENERATE_DATA {
+
+    println!("|--- Delete files");
+    fs::remove_dir_all(FILE_DIR)?;
+    fs::remove_file("src/files/tracks-mini-2.org")?;
+    fs::remove_file("src/files/collection-mini-2.nml")?;
+    fs::copy("src/files/tracks-mini.org", "src/files/tracks-mini-2.org")?;
+    fs::copy("src/files/collection-mini.nml", "src/files/collection-mini-2.nml")?;
+    println!("---| Delete files");
+
+    let matches = App::new("Tracks-database-Traktor")
+                            .version("1.0")
+                            .author("Sebastian Preuß <sebastian.preuss@rwth-aachen.com>")
+                            .about("Rename tracks and sync with org and NML")
+                            .arg(Arg::with_name("verbose")
+                                .short("v")
+                                .help("Sets verbosity"))
+                            .arg(Arg::with_name("generate")
+                                .short("g")
+                                .help("generate test files"))                            
+                            .get_matches();
+
+    if matches.is_present("generate") {
         if !Path::new(FILE_DIR).exists() {
             fs::create_dir(FILE_DIR)?;
         }
         println!("|--- Write files from tracks-sample.txt");
+        let now = Instant::now();
         write_files_from_list()?;
-        println!("---| write files from tracks-sample.txt");
-        println!("|--- Move mp3 and m4a to the right year");
-        match sort_mp3_m4a(FILE_DIR) {
-            Err(e) => println!("{}", e),
-            Ok(_x) => (),
-        };
-        println!("---| move mp3 and m4a to the right year");
-        //println!("Rename files and check length");
-        //check_files(FILE_DIR)?; //rename_files 
+        let dur = now.elapsed();
+        println!("---| write files from tracks-sample.txt in {}.{}.{} sek.", dur.as_secs(), dur.subsec_millis(), dur.subsec_micros());
     }
-    // //let mut xml = XmlDoc::new();
-    // //let mut org = OrgList::parse_file(&"files/collection.nml".to_string());
-    // //let mut xml = XmlDoc::parse(&"test".to_string());
-    // println!("second Round");
-    // let now = Instant::now();
-    // //let output = xml.find_file(&"MANDY vs Booka Shade - Body Language (Tocadisco Remix).wav".to_string());
-    // //println!("output: {}", output);
-    // let dur = now.elapsed();
-    // println!("Find Time: {}.{}.{} sek.", dur.as_secs(), dur.subsec_millis(), dur.subsec_micros());
-    //println!("------- Start: New names ---------------");
+    
+    println!("|--- Move mp3 and m4a to the right year");
+    let now = Instant::now();
+    match sort_mp3_m4a(FILE_DIR) {
+        Err(e) => println!("{}", e),
+        Ok(_x) => (),
+    };
+    let dur = now.elapsed();
+    println!("---| move mp3 and m4a to the right year in {}.{}.{} sek.", dur.as_secs(), dur.subsec_millis(), dur.subsec_micros());
+    
     println!("|--- start Manager");
+    let now = Instant::now();
     let mut manager = match Manager::new(&"src/files/tracks-mini.org".to_string(), &"src/files/collection.nml".to_string()) {
         Some(x) => x,
         None => return Err(Error::new(ErrorKind::InvalidData, "Can not Start manager")),
     };
-    println!("---| start Manager");
+    let dur = now.elapsed();
+    println!("---| start Manager in {}.{}.{} sek.", dur.as_secs(), dur.subsec_millis(), dur.subsec_micros());
+
     println!("|--- Read Files and Update");
-    return manager.read_files(&FILE_DIR.to_string(), 80);
-    println!("---| Read Files and Update");
+    let now = Instant::now();
+    manager.read_files(&FILE_DIR.to_string(), 80)?;
+    let dur = now.elapsed();
+    println!("---| Read Files and Update in {}.{}.{} sek.", dur.as_secs(), dur.subsec_millis(), dur.subsec_micros());
+    Ok(())
 }
 
 fn write_files_from_list() -> io::Result<()> {

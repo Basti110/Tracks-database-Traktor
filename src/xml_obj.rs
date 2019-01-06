@@ -152,7 +152,7 @@ impl XmlDoc {
 
     pub fn parse(path: &String) -> io::Result<XmlDoc> {
         let now = Instant::now();
-        let src: &[u8] = include_bytes!("files/collection-mini.nml");
+        let src: &[u8] = include_bytes!("files/collection.nml");
         //let mut reader = Reader::from_str(xml);
         let mut reader = Reader::from_reader(src);
         reader.trim_text(true);
