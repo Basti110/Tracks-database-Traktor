@@ -51,7 +51,7 @@ fn main() -> io::Result<()> {
                                 .help("generate test files"))                            
                             .get_matches();
 
-    if matches.is_present("generate") {
+    if true { //matches.is_present("generate") {
         if !Path::new(FILE_DIR).exists() {
             fs::create_dir(FILE_DIR)?;
         }
@@ -73,7 +73,7 @@ fn main() -> io::Result<()> {
     
     println!("|--- start Manager");
     let now = Instant::now();
-    let mut manager = match Manager::new(&"src/files/tracks-mini.org".to_string(), &"src/files/collection.nml".to_string()) {
+    let mut manager = match Manager::new(&"src/files/tracks-mini-2.org".to_string(), &"src/files/tracks-mini-2.org".to_string()) {
         Some(x) => x,
         None => return Err(Error::new(ErrorKind::InvalidData, "Can not Start manager")),
     };
@@ -82,7 +82,7 @@ fn main() -> io::Result<()> {
 
     println!("|--- Read Files and Update");
     let now = Instant::now();
-    manager.read_files(&FILE_DIR.to_string(), 80)?;
+    manager.read_files(&FILE_DIR.to_string(), MAX_FILE_NAME_LEN)?;
     let dur = now.elapsed();
     println!("---| Read Files and Update in {}.{}.{} sek.", dur.as_secs(), dur.subsec_millis(), dur.subsec_micros());
     Ok(())
@@ -91,10 +91,10 @@ fn main() -> io::Result<()> {
 fn write_files_from_list() -> io::Result<()> {
     let f = File::open(TRACK_LIST_PATH)?;
     let reader = BufReader::new(f);
-    //println!("{}", "Generate files");
+
     let begin = String::from(FILE_DIR);
     for buffer in reader.lines() {
-        let line = buffer.unwrap().clone();//buffer.clone();
+        let line = buffer.unwrap().clone();
         let mut dirs: Vec<&str> = line.split("/").collect();
         let mut path = begin.clone();
         
@@ -132,17 +132,6 @@ fn get_file_name(file: Result<DirEntry, Error>) -> io::Result<String> {
     };
 
     Ok(file_name.to_string())
-}
-
-fn get_author_name_pos(file_name: &String) -> io::Result<usize> {
-    //let pos = file_name.get_pos('-')?;
-    //let author = file_name.substring(0, pos);
-    let mut pos = match file_name.find(" - ") {
-        Some(x) => x,
-        None => return Err(Error::new(ErrorKind::InvalidData, "Can not find char in String")),
-    };
-    //pos += 2;
-    Ok(pos)
 }
 
 fn move_file_to_year(path_src: &String, path_dst: &str, ext: &str) -> io::Result<()> {

@@ -12,6 +12,7 @@ use std::io;
 use std::io::{Error, ErrorKind};
 use std::fs::{File};
 use std::io::prelude::*;
+use std::io::BufReader;
 
 pub struct Attribute {
     pub key: String,
@@ -152,9 +153,11 @@ impl XmlDoc {
 
     pub fn parse(path: &String) -> io::Result<XmlDoc> {
         let now = Instant::now();
-        let src: &[u8] = include_bytes!("files/collection.nml");
+        let f = File::open(path)?;
+        let f = BufReader::new(f);
+        //let src: &[u8] = include_bytes!("files/collection.nml");
         //let mut reader = Reader::from_str(xml);
-        let mut reader = Reader::from_reader(src);
+        let mut reader = Reader::from_reader(f);
         reader.trim_text(true);
 
         let mut buf = Vec::new();
