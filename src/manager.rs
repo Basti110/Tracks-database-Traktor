@@ -77,12 +77,6 @@ impl Manager {
                 //let relative_path = file.path();
                 //let mut absolute_path = try!(std::env::current_dir());
                 //absolute_path.push(relative_path);
-                for s in file.path().iter() {
-                    match s.to_str() {
-                        Some(x) => println!("{}", x.to_string()),
-                        None => println!("nope"), 
-                    }
-                }
                 path.pop();
                 info.path = path;
 
@@ -210,6 +204,7 @@ impl Manager {
         let mut info = FileInfo::new();
         let author_pos = get_author_name_pos(&file_name)?;
         let version_pos = get_version_name_pos(&file_name)?;
+        let extension = get_extension(&file_name);
         let author;
         let title;
         let mut version;
@@ -229,12 +224,13 @@ impl Manager {
         let short_title = shorter_title(&title);
         let short_version = shorter_version(&version.to_string());
         println!("File Name: {}", file_name);
-        println!("author  : {}", short_author.0.to_string());
-        println!("author+ : {}", short_author.1.to_string());
-        println!("title   : {}", short_title.0.to_string());
-        println!("title+  : {}", short_title.1.to_string());
-        println!("version : {}", short_version.0.to_string());
-        println!("version+: {}", short_version.1.to_string());
+        println!("author   : {}", short_author.0.to_string());
+        println!("author+  : {}", short_author.1.to_string());
+        println!("title    : {}", short_title.0.to_string());
+        println!("title+   : {}", short_title.1.to_string());
+        println!("version  : {}", short_version.0.to_string());
+        println!("version+ : {}", short_version.1.to_string());
+        println!("Extension: {}", extension);
 
         let mut shorter_name = short_author.0.to_string();
         if short_author.1 == "" {
@@ -242,8 +238,11 @@ impl Manager {
         }
         shorter_name.push_str(" - ");
         shorter_name.push_str(short_title.0);
-        shorter_name.push_str(short_version.0.as_str());
-
+        shorter_name.push_str(&short_version.0);
+        shorter_name.push_str(&extension);
+        println!("-- GET INITIALS");
+        println!("{}", get_initials(&title.to_string()));
+        println!("-- DONE GET INITIALS");
         info.short_name = shorter_name;
         info.name = file_name.clone();
         info.author = author.to_string();
@@ -403,6 +402,28 @@ fn get_author_name_pos(file_name: &String) -> io::Result<usize> {
     Ok(pos)
 }
 
+fn get_extension(file_name: &String) -> String {
+    let tuple = match file_name.rfind('.') {
+        Some(x) => file_name.split_at(x),
+        None => ("", ""),
+    };
+    return tuple.1.to_string();
+}
+
+fn get_initials(text: &String) -> String {
+    let mut initials = "".to_string();
+    let split: Vec<&str> = text.split(' ').collect();
+    for s in split {
+        match s.chars().next() {
+            Some(x) => initials = initials + &x.to_uppercase().to_string(),
+            None => (),
+        }
+
+    }
+
+    return initials;
+}
+
 pub struct FileInfo {
     pub name: String,
     pub short_name: String,
@@ -411,7 +432,8 @@ pub struct FileInfo {
     pub title: String,
     pub title_add: String,
     pub version: String,
-    pub path: Vec<String>,
+    pub extension: String,
+    pub path: Vec<String>, 
 }
 
 impl FileInfo {
@@ -424,6 +446,7 @@ impl FileInfo {
             title: "".to_string(),
             title_add: "".to_string(),
             version: "".to_string(),
+            extension: "".to_string(),
             path: vec![],
         }
     }
