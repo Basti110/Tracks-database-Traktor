@@ -21,6 +21,7 @@ use std::str;
 use xml_obj::XmlDoc; 
 use std::time::{Duration, Instant};
 use manager::Manager;
+use regex::Regex;
 
 
 //Const Settings
@@ -64,10 +65,7 @@ fn main() -> io::Result<()> {
     
     println!("|--- Move mp3 and m4a to the right year");
     let now = Instant::now();
-    match sort_mp3_m4a(FILE_DIR) {
-        Err(e) => println!("{}", e),
-        Ok(_x) => (),
-    };
+    sort_mp3_m4a(FILE_DIR);
     let dur = now.elapsed();
     println!("---| move mp3 and m4a to the right year in {}.{}.{} sek.", dur.as_secs(), dur.subsec_millis(), dur.subsec_micros());
     
@@ -142,24 +140,21 @@ fn get_file_name(file: Result<DirEntry, Error>) -> io::Result<String> {
 
 fn move_file_to_year(path_src: &String, path_dst: &str, ext: &str) -> io::Result<()> {
     let files = fs::read_dir(path_src)?;
-    let ext_len = "ext".len();
+    let ext_len = ext.len();
+    let exp = format!("{}{}{}", r"(?P<year>\d{4})(?P<ext>.", ext, r")$");
+    let re = Regex::new(&exp).unwrap();
+
     for file in files {
         let file_name = get_file_name(file)?;
         let len = file_name.len();
 
-        let extension_with_year = match file_name.get(len - (ext_len + 6)..len) {
-            Some(x) => x,
+        let capture = match re.captures(&file_name) {
             None => continue,
+            Some(x) => x,
         };
 
-        if extension_with_year.chars().next().unwrap() != '.' {
-            continue;
-        }
-
-        let year = match extension_with_year.get(1..5) {
-            Some(x) => x,
-            None => continue,
-        };
+        let year = &capture["year"];
+        let extension = &capture["ext"];
 
        match year.parse::<i32>(){
             Ok(x) => x,
@@ -177,16 +172,23 @@ fn move_file_to_year(path_src: &String, path_dst: &str, ext: &str) -> io::Result
             None => continue,
         };
 
-        let new_path = format!("{}{}{}", new_path, new_name, ext);
+        let new_path = format!("{}{}{}", new_path, new_name, extension);
         fs::rename(format!("{}{}",path_src, file_name), new_path)?;
     }
     Ok(())
 }
 
-fn sort_mp3_m4a(path: &str) -> io::Result<()> {
+fn sort_mp3_m4a(path: &str) {
     let mp3_path = format!("{}{}", path, "1mp3/");
     let m4a_path = format!("{}{}", path, "1m4a/");
-    move_file_to_year(&mp3_path, FILE_DIR, "mp3")?;
-    move_file_to_year(&m4a_path, FILE_DIR, "m4a")?;
-    Ok(())
+    
+    match move_file_to_year(&mp3_path, FILE_DIR, "mp3") {
+        Err(e) => println!("{}", e),
+        Ok(_x) => (),
+    };
+
+    match move_file_to_year(&m4a_path, FILE_DIR, "m4a") {
+        Err(e) => println!("{}", e),
+        Ok(_x) => (),
+    };
 }
