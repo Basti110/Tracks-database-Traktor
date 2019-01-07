@@ -245,14 +245,16 @@ impl XmlDoc {
         return Ok(xml_doc);
     }
 
-    pub fn write(&self, path: &str) -> io::Result<()> {
+    pub fn write_file(&self, path: &str) -> io::Result<()> {
         let mut file = OpenOptions::new()
             .read(true)
             .write(true)
             .create(true)
             .open(path)?;
         
-        return file.write_all(self.start.borrow_mut().to_string().as_bytes());
+        let test_string = self.start.borrow_mut().to_string();
+        println!("{}", test_string);
+        return file.write_all(test_string.as_bytes());
     }
 
     pub fn find_file(&self, name: &String) -> Option<Rc<RefCell<XmlTag>>> {

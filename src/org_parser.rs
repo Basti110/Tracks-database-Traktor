@@ -14,6 +14,7 @@ pub struct OrgEntry {
     pub title: String,
     pub title_add: String,
     pub version: String,
+    pub version_add: String,
     pub year: String,
     pub release: String,
     pub notes: String
@@ -28,6 +29,7 @@ impl OrgEntry {
             title: "".to_string(),
             title_add: "".to_string(),
             version: "".to_string(),
+            version_add: "".to_string(),
             year: "".to_string(),
             release: "".to_string(), 
             notes: "".to_string(), 
@@ -62,6 +64,11 @@ impl OrgEntry {
         if self.version != "".to_string() {
             string.push_str(&":Version:   ");
             string.push_str(&self.version);
+            string.push_str(&"\n");
+        }
+        if self.version_add != "".to_string() {
+            string.push_str(&":Version+:  ");
+            string.push_str(&self.version_add);
             string.push_str(&"\n");
         }
         if self.year != "".to_string() {
@@ -119,8 +126,9 @@ impl OrgList {
             .open(path)?;
 
         for entry in &self.orgs {
-            println!("{}", entry.to_string());
+            //println!("{}", entry.to_string());
             file.write_all(entry.to_string().as_bytes())?;
+            file.write_all(b"\n\n")?;
         }
         
         Ok(())
@@ -189,6 +197,11 @@ impl OrgList {
                         entry.version = line.trim().to_string();
                         //println!("Version");
                     }
+                    else if line.match_first_chars( ":Version+:".to_string()) {
+                        line.drain(..10);
+                        entry.version_add = line.trim().to_string();
+                        //println!("Version");
+                    }                    
                     else if line.match_first_chars( ":Year:".to_string()) {
                         line.drain(..6);
                         entry.year = line.trim().to_string();

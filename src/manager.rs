@@ -9,6 +9,7 @@ use string_traits::StringUtils;
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::ffi::OsStr;
+use regex::Regex;
 
 
 static SEPARATE_AUTHOR: &'static [&str] = &["feat", "ft", "presents", "pres", "with", "introduce"];
@@ -20,8 +21,10 @@ macro_rules! entry {
 }
 
 pub struct Manager {
+    pub org_path: String,
+    pub nml_path: String,
     pub org: OrgList,
-    pub xml: XmlDoc,
+    pub nml: XmlDoc,
     pub verbose: bool,
 }
 
@@ -32,14 +35,16 @@ impl Manager {
             Ok(x) => x,
         };
 
-        let xml = match XmlDoc::parse(&nml_path) {
+        let nml = match XmlDoc::parse(&nml_path) {
             Err(e) => {println!("Error: {}", e); return None;},
             Ok(x) => x,
         };
 
         Some(Manager {
+            org_path: org_path.clone(),
+            nml_path: nml_path.clone(),
             org: org,
-            xml: xml,
+            nml: nml,
             verbose: true,
         })
     }
@@ -53,7 +58,8 @@ impl Manager {
     }
 
     pub fn write_files(&self) -> io::Result<()> {
-
+        self.org.write_file(&self.org_path)?;
+        self.nml.write_file(&self.nml_path)?;
         Ok(())
     }
 
@@ -62,9 +68,24 @@ impl Manager {
         let count = 0;
         
 
-        for folder in folders {
-            let folder_path: String = folder.unwrap().path().display().to_string();
+        for f in folders {
+            let folder = match f {
+                Ok(x) => x.path(),
+                Err(e) => return Err(e.into()),
+            };
+
+            let folder_path: String = folder.display().to_string();
             println!("Name: {}", path);
+            
+            let mut folder_name = match folder.file_name() {
+                Some(x) => x.to_str().unwrap(),
+                None => "",
+            };
+
+            let re = Regex::new(r"^\d{4}$").unwrap();
+            if !re.is_match(folder_name) {
+                folder_name = "";
+            }
             
             let files = fs::read_dir(folder_path.clone())?;
             for f in files { 
@@ -84,6 +105,7 @@ impl Manager {
                 //absolute_path.push(relative_path);
                 path.pop();
                 info.path = path;
+                info.year = folder_name.to_string();
 
                 println!("   ---------- search org ----------------");
                 let index: usize = match (self.org).find_entry(&info.name) {
@@ -93,7 +115,7 @@ impl Manager {
                 println!("   ---------- end search org -------------");
                 //(self.org).orgs[index].name = "".to_string();
                 println!("   ---------- search nml ----------------");
-                let xml = self.xml.find_file(&info.name);
+                let xml = self.nml.find_file(&info.name);
                 if xml.is_some() {
                     println!("Found");
                 } 
@@ -171,7 +193,7 @@ impl Manager {
                     
                 }
             }
-            value!(&self.xml.start).replace_primarykey(&key, &new_key);
+            value!(&self.nml.start).replace_primarykey(&key, &new_key);
         }
         Ok(())
         //return Err(Error::new(ErrorKind::NotFound, "Error"));
@@ -242,7 +264,7 @@ impl Manager {
             author.push_str("_");
         }
 
-        let mut short_name = author + " - " + short_title.0 + &short_version.0 + &extension;
+        let mut short_name = author.clone() + " - " + short_title.0 + &short_version.0 + &extension;
         
         if (short_name.chars().count() > max_size) {
 
@@ -253,22 +275,26 @@ impl Manager {
         println!("-- DONE GET INITIALS");
         info.short_name = short_name;
         info.name = file_name.clone();
-        info.author = author.to_string();
-        info.title = title.to_string();
-        info.version = version.to_string();
-        return Ok(info);
-    }
+        info.author = short_author.0.to_string();
+        info.author_add = short_author.1.to_string();
+        info.title = short_title.0.to_string();
+        info.title_add = short_title.1.to_string();
+        info.version = short_version.0.to_string();
+        info.version_add = short_version.1.to_string();
 
-    fn create_final_name(author: &mut String, title: &String, version: &String) -> String {
-        return author + " - " + title + version;
+        return Ok(info);
     }
 
     fn get_new_org_entry(&mut self, info: &FileInfo) -> io::Result<usize> {
         let mut entry = OrgEntry::new();
         entry.name = info.short_name.clone();
         entry.author = info.author.clone();
+        entry.author_add = info.author_add.clone();
         entry.title = info.title.clone();
+        entry.title_add = info.title_add.clone();
         entry.version = info.version.clone();
+        entry.version_add = info.version_add.clone();
+        entry.year = info.year.clone();
         //println!("shorter_name: {}", shorter_name);
         Ok(self.org.add(entry))
     }
@@ -322,8 +348,8 @@ fn shorter_version(version: &String) -> (String, String) {
     for i in 0..len {
         match version.find(SEPARATE_VERSION[i]) {
             Some(x) => {
-                let s = format!("(Special {})", SEPARATE_VERSION[i]);
-                return (s, "".to_string());
+                let s = format!("(Special_{})", SEPARATE_VERSION[i]);
+                return (s, version.clone());
             },
             None => continue,
         };
@@ -444,7 +470,9 @@ pub struct FileInfo {
     pub title: String,
     pub title_add: String,
     pub version: String,
+    pub version_add: String,
     pub extension: String,
+    pub year: String,
     pub path: Vec<String>, 
 }
 
@@ -458,7 +486,9 @@ impl FileInfo {
             title: "".to_string(),
             title_add: "".to_string(),
             version: "".to_string(),
+            version_add: "".to_string(),
             extension: "".to_string(),
+            year: "".to_string(),
             path: vec![],
         }
     }

@@ -73,7 +73,7 @@ fn main() -> io::Result<()> {
     
     println!("|--- start Manager");
     let now = Instant::now();
-    let mut manager = match Manager::new(&"src/files/tracks-mini-2.org".to_string(), &"src/files/tracks-mini-2.org".to_string()) {
+    let mut manager = match Manager::new(&"src/files/tracks-mini-2.org".to_string(), &"src/files/collection-mini-2.nml".to_string()) {
         Some(x) => x,
         None => return Err(Error::new(ErrorKind::InvalidData, "Can not Start manager")),
     };
@@ -85,6 +85,12 @@ fn main() -> io::Result<()> {
     manager.read_files(&FILE_DIR.to_string(), MAX_FILE_NAME_LEN)?;
     let dur = now.elapsed();
     println!("---| Read Files and Update in {}.{}.{} sek.", dur.as_secs(), dur.subsec_millis(), dur.subsec_micros());
+
+    println!("|--- Write Files");
+    let now = Instant::now();
+    manager.write_files()?;
+    let dur = now.elapsed();
+    println!("---| Write Files in {}.{}.{} sek.", dur.as_secs(), dur.subsec_millis(), dur.subsec_micros());
     Ok(())
 }
 
@@ -180,7 +186,7 @@ fn move_file_to_year(path_src: &String, path_dst: &str, ext: &str) -> io::Result
 fn sort_mp3_m4a(path: &str) -> io::Result<()> {
     let mp3_path = format!("{}{}", path, "1mp3/");
     let m4a_path = format!("{}{}", path, "1m4a/");
-    move_file_to_year(&mp3_path, "files/", "mp3")?;
-    move_file_to_year(&m4a_path, "files/", "m4a")?;
+    move_file_to_year(&mp3_path, FILE_DIR, "mp3")?;
+    move_file_to_year(&m4a_path, FILE_DIR, "m4a")?;
     Ok(())
 }
