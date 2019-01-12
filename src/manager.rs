@@ -13,6 +13,7 @@ use regex::Regex;
 
 
 static SEPARATE_AUTHOR: &'static [&str] = &["feat", "ft", "presents", "pres", "with", "introduce"];
+static SEPARATE_AUTHOR_SHORT: &'static [&str] = &["&", "vs"];
 static SEPARATE_VERSION: &'static [&str] = &["Remix", "Mix", "Dub"];
 
 #[macro_use]
@@ -26,10 +27,11 @@ pub struct Manager {
     pub org: OrgList,
     pub nml: XmlDoc,
     pub verbose: bool,
+    pub max_len: usize,
 }
 
 impl Manager {
-    pub fn new(org_path: &String, nml_path: &String) -> Option<Manager> {
+    pub fn new(org_path: &String, nml_path: &String, max_len: usize) -> Option<Manager> {
         let org = match OrgList::parse_file(&org_path) {
             Err(e) => {println!("Error: {}", e); return None;},
             Ok(x) => x,
@@ -46,6 +48,7 @@ impl Manager {
             org: org,
             nml: nml,
             verbose: true,
+            max_len: max_len,
         })
     }
 }
@@ -53,7 +56,7 @@ impl Manager {
 impl Manager {
     pub fn debug(&self, out: &str) {
         if self.verbose {
-            println!("Manager: {}", &out);
+            println!("  {}", &out);
         }
     }
 
@@ -63,7 +66,7 @@ impl Manager {
         Ok(())
     }
 
-    pub fn read_files(&mut self, path: &String, max_size: usize) -> io::Result<()> {
+    pub fn read_files(&mut self, path: &String) -> io::Result<()> {
         let folders = fs::read_dir(path)?;
         let count = 0;
         
@@ -75,7 +78,7 @@ impl Manager {
             };
 
             let folder_path: String = folder.display().to_string();
-            println!("Name: {}", path);
+            //println!("Name: {}", path);
             
             let mut folder_name = match folder.file_name() {
                 Some(x) => x.to_str().unwrap(),
@@ -86,47 +89,52 @@ impl Manager {
             if !re.is_match(folder_name) {
                 folder_name = "";
             }
-            
+
+            //let mut relative_path = folder.path();
+            let path: Vec<_> = folder.components().map(|comp| comp.as_os_str().to_str().unwrap().to_string()).collect();
+
             let files = fs::read_dir(folder_path.clone())?;
             for f in files { 
                 let file = match f {
                     Ok(t) => t,
                     Err(e) => return Err(e.into()),
                 };
-                println!("--- get Filename");
+                //println!("--- get Filename");
                 let file_name = Manager::get_file_name(&file)?;
-                println!("--- Filename = \"{}\"", file_name);
+                self.debug(&format!("\n\n New File: {}", file_name));
+                //println!("--- Filename = \"{}\"", file_name);
                 
-                let mut info = self.get_file_information(file_name, max_size)?;
-
-                let mut path: Vec<String> = vec![];
-                //let relative_path = file.path();
+                let mut info = self.get_file_information(file_name)?;
+                
+                //let mut path: Vec<String> = vec![];
+                let mut relative_path = file.path();
+                
                 //let mut absolute_path = try!(std::env::current_dir());
                 //absolute_path.push(relative_path);
-                path.pop();
-                info.path = path;
+
+                info.path = path.clone();
                 info.year = folder_name.to_string();
 
-                println!("   ---------- search org ----------------");
+                self.debug("---------- search org ----------------");
                 let index: usize = match (self.org).find_entry(&info.name) {
-                    Some(x) => {println!("   Found"); x},
-                    None => {println!("   New Entry"); self.get_new_org_entry(&info)?},
+                    Some(x) => {self.debug("Found entry"); x},
+                    None => {self.debug("Create new entry"); self.get_new_org_entry(&info)?},
                 };
-                println!("   ---------- end search org -------------");
-                //(self.org).orgs[index].name = "".to_string();
-                println!("   ---------- search nml ----------------");
+
+                self.debug("---------- search nml ----------------");
                 let xml = self.nml.find_file(&info.name);
+
                 if xml.is_some() {
-                    println!("Found");
+                    self.debug("Found entry");
                 } 
                 else {
-                    println!("Not found");
+                    self.debug("Not found entry");
                 }
-                println!("   ---------- rename file ---------------");
+
+                self.debug("---------- rename file ---------------");
                 self.rename(index, xml, &folder_path, &info)?;
-                println!("   ---------- end rename file ---------------");
                 
-                if info.name.len() > max_size {
+                if info.name.len() > self.max_len {
                     //println!("Name: {}", file_name);
                     //let entry = Manager::get_new_org_entry(&file_name)?;
                     //&self.org.add(entry);
@@ -142,16 +150,17 @@ impl Manager {
 
     pub fn rename(&mut self, org_idx: usize, xml: Option<Rc<RefCell<XmlTag>>>, path: &String, info: &FileInfo) -> io::Result<()>{
         // Rename Path
+        self.debug(&info.short_name);
         let old_path = format!("{}{}{}", &path, "/", info.name);
         let new_path = format!("{}{}{}", &path, "/", info.short_name);
-        println!("Rename {} to {}", old_path, new_path);
+        //println!("Rename {} to {}", old_path, new_path);
         //fs::rename(old_path, new_path)?;
 
         //Rename Org
-        println!("New Org Name:");
+        //println!("New Org Name:");
         (self.org).orgs[org_idx].name = info.short_name.clone();
-        println!("Org Entries:");
-        println!("{}", (self.org).orgs[org_idx].to_string());
+        //println!("Org Entries:");
+        //println!("{}", (self.org).orgs[org_idx].to_string());
 
         //Rename NML
         if xml.is_some() {
@@ -166,7 +175,7 @@ impl Manager {
                     let mut new_dir = "".to_string();
 
                     for mut attr in value!(t).attributes.iter_mut() {
-                        println!("{}", attr.key);
+                        //println!("{}", attr.key);
                         if attr.key == "FILE".to_string() {
                             file = attr.value.clone();
                             attr.value = info.short_name.clone();
@@ -182,14 +191,14 @@ impl Manager {
                                 new_dir.push_str(p.as_str());
                             }
                             new_dir.push_str("/:");
-                            println!("{}", new_dir);
+                            //println!("{}", new_dir);
                             attr.value = new_dir.clone();
                         }
                     }
                     key = volume.clone() + &dir + &file;
                     new_key = volume + &new_dir + &info.short_name.clone();
-                    println!("Key: \"{}\"", key);
-                    println!("new Key: \"{}\"", new_key);
+                    //println!("Key: \"{}\"", key);
+                    //println!("new Key: \"{}\"", new_key);
                     
                 }
             }
@@ -227,7 +236,7 @@ impl Manager {
         Ok(file_name.to_string())
     }
 
-    fn get_file_information(&mut self, file_name: String, max_size: usize) -> io::Result<FileInfo> {
+    fn get_file_information(&mut self, file_name: String) -> io::Result<FileInfo> {
         let mut info = FileInfo::new();
         let author_pos = get_author_name_pos(&file_name)?;
         let version_pos = get_version_name_pos(&file_name)?;
@@ -247,17 +256,17 @@ impl Manager {
             version = version.get_unchecked(0..extension_pos + offset);
         }
 
-        let short_author = shorter_author(&author);
+        let short_author = shorter_author(&author, SEPARATE_AUTHOR);
         let short_title = shorter_title(&title);
         let short_version = shorter_version(&version.to_string());
-        println!("File Name: {}", file_name);
-        println!("author   : {}", short_author.0.to_string());
-        println!("author+  : {}", short_author.1.to_string());
-        println!("title    : {}", short_title.0.to_string());
-        println!("title+   : {}", short_title.1.to_string());
-        println!("version  : {}", short_version.0.to_string());
-        println!("version+ : {}", short_version.1.to_string());
-        println!("Extension: {}", extension);
+        // println!("File Name: {}", file_name);
+        // println!("author   : {}", short_author.0.to_string());
+        // println!("author+  : {}", short_author.1.to_string());
+        // println!("title    : {}", short_title.0.to_string());
+        // println!("title+   : {}", short_title.1.to_string());
+        // println!("version  : {}", short_version.0.to_string());
+        // println!("version+ : {}", short_version.1.to_string());
+        // println!("Extension: {}", extension);
 
         let mut author = short_author.0.to_string();
         if short_author.1 != "" {
@@ -266,13 +275,16 @@ impl Manager {
 
         let mut short_name = author.clone() + " - " + short_title.0 + &short_version.0 + &extension;
         
-        if (short_name.chars().count() > max_size) {
-
+        let count = short_name.chars().count();
+        if count > self.max_len {
+            println!("-- to long: {}", count);
+            let initals = get_initials(&short_title.0.to_string());
+            let author = shorter_author(&author, SEPARATE_AUTHOR_SHORT);
+            //println!("{}", author);
+            short_name = author.0.to_string() + "_ - " + &initals + &short_version.0 + &extension;
+            println!("{}", short_name);
         }
 
-        println!("-- GET INITIALS");
-        println!("{}", get_initials(&title.to_string()));
-        println!("-- DONE GET INITIALS");
         info.short_name = short_name;
         info.name = file_name.clone();
         info.author = short_author.0.to_string();
@@ -300,11 +312,11 @@ impl Manager {
     }
 }
 
-fn shorter_author<'a>(author: &'a str) -> (&'a str, &'a str) {
-    let len = SEPARATE_AUTHOR.len();
+fn shorter_author<'a>(author: &'a str, seperation: &[&str]) -> (&'a str, &'a str) {
+    let len = seperation.len();
     let mut pos: usize = 255;
     for x in 0..len {
-        pos = match author.find(SEPARATE_AUTHOR[x]) {
+        pos = match author.find(seperation[x]) {
             Some(x) => if x < pos {
                 x
             }
@@ -396,7 +408,7 @@ fn remove_first_p(name: &String) -> (String, String) {
     if open_pos < close_pos && found_open == true {
         let a = name.to_string().substring(open_pos + 1, (close_pos - open_pos) + 1); 
         let b = name.to_string().rsubstring(open_pos, close_pos + 1);
-        return (a, b);
+        return (b, a);
     }
     (name.clone(), "".to_string())
 }

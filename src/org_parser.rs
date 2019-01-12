@@ -92,6 +92,7 @@ impl OrgEntry {
 }
 
 pub struct OrgList {
+    pub header: String,
     pub orgs: Vec<OrgEntry>,
     count: usize,
 }
@@ -99,6 +100,7 @@ pub struct OrgList {
 impl OrgList {
     pub fn new() -> OrgList {
         OrgList {
+            header: "".to_string(),
             orgs: Vec::new(),
             count: 0,
         }
@@ -125,6 +127,8 @@ impl OrgList {
             .create(true)
             .open(path)?;
 
+        file.write_all(self.header.as_bytes())?;
+
         for entry in &self.orgs {
             //println!("{}", entry.to_string());
             file.write_all(entry.to_string().as_bytes())?;
@@ -142,18 +146,20 @@ impl OrgList {
         //let test = reader.nex();
         let mut line = "".to_string();
         //let mut len: usize = 0;
-        
+        let mut first_found = false;
         loop {
             line = "".to_string();
             let len = reader.read_line(&mut line)?;
             let mut entry = OrgEntry::new();
+
             if len == 0 {
                 break;
             }   
+
             //line.pop();
             if line.match_first_chars( "**".to_string()) {
                 //let re = Regex::new(r"^\d{4}-\d{2}-\d{2}$").unwrap();
-
+                first_found = true;
                 line.drain(..3);
                 line.pop();
                 entry.name = line.clone();
@@ -222,6 +228,10 @@ impl OrgList {
                     }
                 }
                 org_list.add(entry);
+            }
+            
+            if !first_found {
+                org_list.header.push_str(&line);
             }
         }
 

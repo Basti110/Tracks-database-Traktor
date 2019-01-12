@@ -128,7 +128,6 @@ impl XmlTag {
         if self.name == "PRIMARYKEY".to_string() {
             for mut attr in &mut self.attributes {
                 if attr.key == "KEY".to_string() && attr.value == *key {
-                    println!("Found Key :)");
                     attr.value = new_key.clone();
                 }
             }
@@ -251,10 +250,16 @@ impl XmlDoc {
             .write(true)
             .create(true)
             .open(path)?;
-        
-        let test_string = self.start.borrow_mut().to_string();
-        println!("{}", test_string);
-        return file.write_all(test_string.as_bytes());
+
+        file.write_all(b"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n")?;
+        for tag in &self.start.borrow_mut().childs {
+            file.write_all(value!(tag).to_string().as_bytes())?;
+            file.write_all(b"\n")?;
+        }
+
+        //let test_string = self.start.borrow_mut().to_string();
+        //println!("{}", test_string);
+        Ok(())
     }
 
     pub fn find_file(&self, name: &String) -> Option<Rc<RefCell<XmlTag>>> {

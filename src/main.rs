@@ -28,7 +28,7 @@ use regex::Regex;
 //const GENERATE_DATA: bool = false;
 const TRACK_LIST_PATH: &str = "src/files/tracks-sample-mini.txt";
 const FILE_DIR: &str = "files-mini/";
-const MAX_FILE_NAME_LEN: usize = 80;
+const MAX_FILE_NAME_LEN: usize = 55;
 
 fn main() -> io::Result<()> {
 
@@ -49,8 +49,20 @@ fn main() -> io::Result<()> {
                                 .help("Sets verbosity"))
                             .arg(Arg::with_name("generate")
                                 .short("g")
-                                .help("generate test files"))                            
+                                .help("generate test files"))     
+                            .arg(Arg::with_name("len")
+                                .short("l")
+                                .help(&format!("Max name length. Default = {}", MAX_FILE_NAME_LEN))
+                                .takes_value(true))                         
                             .get_matches();
+
+    let max_len = match matches.value_of("length") {
+        None => MAX_FILE_NAME_LEN,
+        Some(x) => match x.parse::<usize>() {
+            Err(_e) => MAX_FILE_NAME_LEN,
+            Ok(x) => x,
+        },
+    };
 
     if true { //matches.is_present("generate") {
         if !Path::new(FILE_DIR).exists() {
@@ -71,7 +83,7 @@ fn main() -> io::Result<()> {
     
     println!("|--- start Manager");
     let now = Instant::now();
-    let mut manager = match Manager::new(&"src/files/tracks-mini-2.org".to_string(), &"src/files/collection-mini-2.nml".to_string()) {
+    let mut manager = match Manager::new(&"src/files/tracks-mini-2.org".to_string(), &"src/files/collection-mini-2.nml".to_string(), max_len) {
         Some(x) => x,
         None => return Err(Error::new(ErrorKind::InvalidData, "Can not Start manager")),
     };
@@ -80,7 +92,7 @@ fn main() -> io::Result<()> {
 
     println!("|--- Read Files and Update");
     let now = Instant::now();
-    manager.read_files(&FILE_DIR.to_string(), MAX_FILE_NAME_LEN)?;
+    manager.read_files(&FILE_DIR.to_string())?;
     let dur = now.elapsed();
     println!("---| Read Files and Update in {}.{}.{} sek.", dur.as_secs(), dur.subsec_millis(), dur.subsec_micros());
 
