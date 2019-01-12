@@ -1,25 +1,19 @@
 use org_parser::{OrgEntry, OrgList};
 use xml_obj::{XmlDoc, XmlTag};
 use std::fs;
-use std::fs::{File, DirEntry};
+use std::fs::DirEntry;
 use std::io;
 use std::io::{Error, ErrorKind};
-use std::path::{Path, PathBuf};
+use std::path::{Path};
 use string_traits::StringUtils;
 use std::rc::Rc;
 use std::cell::RefCell;
-use std::ffi::OsStr;
 use regex::Regex;
 
 
 static SEPARATE_AUTHOR: &'static [&str] = &["feat", "ft", "presents", "pres", "with", "introduce"];
 static SEPARATE_AUTHOR_SHORT: &'static [&str] = &["&", "vs"];
 static SEPARATE_VERSION: &'static [&str] = &["Remix", "Mix", "Dub"];
-
-#[macro_use]
-macro_rules! entry {
-    ($e:expr) => ((self.org).orgs[$e]);
-}
 
 pub struct Manager {
     pub org_path: String,
@@ -107,8 +101,7 @@ impl Manager {
                 let mut info = self.get_file_information(file_name)?;
                 
                 //let mut path: Vec<String> = vec![];
-                let mut relative_path = file.path();
-                
+                //let mut relative_path = file.path();
                 //let mut absolute_path = try!(std::env::current_dir());
                 //absolute_path.push(relative_path);
 
@@ -133,34 +126,21 @@ impl Manager {
 
                 self.debug("---------- rename file ---------------");
                 self.rename(index, xml, &folder_path, &info)?;
-                
-                if info.name.len() > self.max_len {
-                    //println!("Name: {}", file_name);
-                    //let entry = Manager::get_new_org_entry(&file_name)?;
-                    //&self.org.add(entry);
-                    //count += 1;
-                }
             }
         }
         println!("Count {}; ", count);
-        //entry_list.write_file();
         Ok(())
-        //return Ok(());
     }
 
-    pub fn rename(&mut self, org_idx: usize, xml: Option<Rc<RefCell<XmlTag>>>, path: &String, info: &FileInfo) -> io::Result<()>{
+    pub fn rename(&mut self, org_idx: usize, xml: Option<Rc<RefCell<XmlTag>>>, _path: &String, info: &FileInfo) -> io::Result<()>{
         // Rename Path
         self.debug(&info.short_name);
-        let old_path = format!("{}{}{}", &path, "/", info.name);
-        let new_path = format!("{}{}{}", &path, "/", info.short_name);
-        //println!("Rename {} to {}", old_path, new_path);
-        //fs::rename(old_path, new_path)?;
+        //let old_path = format!("{}{}{}", &path, "/", info.name);
+        //let new_path = format!("{}{}{}", &path, "/", info.short_name);
 
         //Rename Org
-        //println!("New Org Name:");
         (self.org).orgs[org_idx].name = info.short_name.clone();
-        //println!("Org Entries:");
-        //println!("{}", (self.org).orgs[org_idx].to_string());
+
 
         //Rename NML
         if xml.is_some() {
@@ -175,7 +155,6 @@ impl Manager {
                     let mut new_dir = "".to_string();
 
                     for mut attr in value!(t).attributes.iter_mut() {
-                        //println!("{}", attr.key);
                         if attr.key == "FILE".to_string() {
                             file = attr.value.clone();
                             attr.value = info.short_name.clone();
@@ -191,21 +170,16 @@ impl Manager {
                                 new_dir.push_str(p.as_str());
                             }
                             new_dir.push_str("/:");
-                            //println!("{}", new_dir);
                             attr.value = new_dir.clone();
                         }
                     }
                     key = volume.clone() + &dir + &file;
-                    new_key = volume + &new_dir + &info.short_name.clone();
-                    //println!("Key: \"{}\"", key);
-                    //println!("new Key: \"{}\"", new_key);
-                    
+                    new_key = volume + &new_dir + &info.short_name.clone();     
                 }
             }
             value!(&self.nml.start).replace_primarykey(&key, &new_key);
         }
         Ok(())
-        //return Err(Error::new(ErrorKind::NotFound, "Error"));
     }
 
     pub fn get_path(file: &DirEntry) -> io::Result<String> {
@@ -245,11 +219,13 @@ impl Manager {
         let title;
         let mut version;
         let mut offset = " - ".len();
+
         unsafe {
             author = file_name.get_unchecked(0..author_pos);
             title = file_name.get_unchecked(author_pos + offset..version_pos);
             version = file_name.get_unchecked(version_pos..file_name.len());
         }
+
         let extension_pos = version.to_string().rfind_result(").")?;
         offset = ")".len();
         unsafe {
@@ -259,6 +235,7 @@ impl Manager {
         let short_author = shorter_author(&author, SEPARATE_AUTHOR);
         let short_title = shorter_title(&title);
         let short_version = shorter_version(&version.to_string());
+
         // println!("File Name: {}", file_name);
         // println!("author   : {}", short_author.0.to_string());
         // println!("author+  : {}", short_author.1.to_string());
@@ -268,21 +245,14 @@ impl Manager {
         // println!("version+ : {}", short_version.1.to_string());
         // println!("Extension: {}", extension);
 
-        let mut author = short_author.0.to_string();
-        if short_author.1 != "" {
-            author.push_str("_");
-        }
-
-        let mut short_name = author.clone() + " - " + short_title.0 + &short_version.0 + &extension;
-        
+        let author = short_author.0.to_string();
+        let mut short_name = author.clone() + "_ - " + short_title.0 + &short_version.0 + &extension;
         let count = short_name.chars().count();
         if count > self.max_len {
-            println!("-- to long: {}", count);
+            //println!("-- to long: {}", count);
             let initals = get_initials(&short_title.0.to_string());
             let author = shorter_author(&author, SEPARATE_AUTHOR_SHORT);
-            //println!("{}", author);
             short_name = author.0.to_string() + "_ - " + &initals + &short_version.0 + &extension;
-            println!("{}", short_name);
         }
 
         info.short_name = short_name;
@@ -293,7 +263,6 @@ impl Manager {
         info.title_add = short_title.1.to_string();
         info.version = short_version.0.to_string();
         info.version_add = short_version.1.to_string();
-
         return Ok(info);
     }
 
@@ -307,7 +276,6 @@ impl Manager {
         entry.version = info.version.clone();
         entry.version_add = info.version_add.clone();
         entry.year = info.year.clone();
-        //println!("shorter_name: {}", shorter_name);
         Ok(self.org.add(entry))
     }
 }
@@ -359,7 +327,7 @@ fn shorter_version(version: &String) -> (String, String) {
     let len = SEPARATE_VERSION.len();
     for i in 0..len {
         match version.find(SEPARATE_VERSION[i]) {
-            Some(x) => {
+            Some(_x) => {
                 let s = format!("(Special_{})", SEPARATE_VERSION[i]);
                 return (s, version.clone());
             },
@@ -379,7 +347,7 @@ fn remove_first_p(name: &String) -> (String, String) {
         let mut char_pos: usize = 0;
         let mut chars = name.chars();
         match chars.next() {
-                Some(x) => (),
+                Some(_x) => (),
                 None => return (name.clone(), "".to_string()),
         };
         loop {
@@ -442,13 +410,10 @@ fn get_version_name_pos(file_name: &String) -> io::Result<usize> {
 }
 
 fn get_author_name_pos(file_name: &String) -> io::Result<usize> {
-    //let pos = file_name.get_pos('-')?;
-    //let author = file_name.substring(0, pos);
-    let mut pos = match file_name.find(" - ") {
+    let pos = match file_name.find(" - ") {
         Some(x) => x,
         None => return Err(Error::new(ErrorKind::InvalidData, "Can not find char in String")),
     };
-    //pos += 2;
     Ok(pos)
 }
 

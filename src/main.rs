@@ -9,8 +9,8 @@ extern crate regex;
 extern crate clap;
 use clap::{Arg, App};
 
-use org_parser::{OrgEntry, OrgList};
-use string_traits::StringUtils;
+//use org_parser::{OrgEntry, OrgList};
+//use string_traits::StringUtils;
 use std::io;
 use std::io::prelude::*;
 use std::io::{Error, ErrorKind, BufReader};
@@ -18,8 +18,8 @@ use std::fs;
 use std::fs::{File, DirEntry};
 use std::path::Path;
 use std::str;
-use xml_obj::XmlDoc; 
-use std::time::{Duration, Instant};
+//use xml_obj::XmlDoc; 
+use std::time::Instant;
 use manager::Manager;
 use regex::Regex;
 
@@ -170,7 +170,7 @@ fn move_file_to_year(path_src: &String, path_dst: &str, ext: &str) -> io::Result
 
        match year.parse::<i32>(){
             Ok(x) => x,
-            Err(e) => continue,
+            Err(_e) => continue,
         };
         
         let new_path = format!("{}{}{}", path_dst, year, "/");
