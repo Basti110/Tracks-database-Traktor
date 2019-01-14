@@ -41,7 +41,7 @@ impl Manager {
             nml_path: nml_path.clone(),
             org: org,
             nml: nml,
-            verbose: true,
+            verbose: false,
             max_len: max_len,
         })
     }
@@ -98,7 +98,13 @@ impl Manager {
                 self.debug(&format!("\n\n New File: {}", file_name));
                 //println!("--- Filename = \"{}\"", file_name);
                 
-                let mut info = self.get_file_information(file_name)?;
+                let mut info = match self.get_file_information(file_name) {
+                    Err(e) => {
+                        println!("Error: {}", e);
+                        continue;
+                    },
+                    Ok(x) => x,
+                };
                 
                 //let mut path: Vec<String> = vec![];
                 //let mut relative_path = file.path();
@@ -119,13 +125,17 @@ impl Manager {
 
                 if xml.is_some() {
                     self.debug("Found entry");
+                    println!("{}", &info.short_name);
                 } 
                 else {
                     self.debug("Not found entry");
                 }
 
                 self.debug("---------- rename file ---------------");
-                self.rename(index, xml, &folder_path, &info)?;
+                match self.rename(index, xml, &folder_path, &info) {
+                    Err(e) => println!("Error rename: Skip {}, {}", &info.name, e),
+                    Ok(x) => (),
+                };
             }
         }
         println!("Count {}; ", count);
@@ -226,8 +236,8 @@ impl Manager {
             version = file_name.get_unchecked(version_pos..file_name.len());
         }
 
-        let extension_pos = version.to_string().rfind_result(").")?;
-        offset = ")".len();
+        let extension_pos = version.to_string().rfind_result(".")?;
+
         unsafe {
             version = version.get_unchecked(0..extension_pos + offset);
         }
@@ -277,6 +287,36 @@ impl Manager {
         entry.version_add = info.version_add.clone();
         entry.year = info.year.clone();
         Ok(self.org.add(entry))
+    }
+
+    fn update_org_entry(&mut self, org_idx: usize, info: &FileInfo) {
+        if (self.org).orgs[org_idx].author == ""  { 
+            (self.org).orgs[org_idx].author = info.author.clone(); 
+        }
+
+        if (self.org).orgs[org_idx].author == ""  { 
+            (self.org).orgs[org_idx].author_add = info.author_add.clone(); 
+        }
+
+        if (self.org).orgs[org_idx].title == ""  { 
+            (self.org).orgs[org_idx].title = info.title.clone(); 
+        }
+
+        if (self.org).orgs[org_idx].title_add == ""  { 
+            (self.org).orgs[org_idx].title_add = info.title_add.clone(); 
+        }
+
+        if (self.org).orgs[org_idx].version == ""  { 
+            (self.org).orgs[org_idx].version = info.version.clone(); 
+        }
+
+        if (self.org).orgs[org_idx].version_add == ""  { 
+            (self.org).orgs[org_idx].version_add = info.version_add.clone(); 
+        }
+
+        if (self.org).orgs[org_idx].year == ""  { 
+            (self.org).orgs[org_idx].year = info.year.clone(); 
+        }
     }
 }
 
@@ -382,7 +422,14 @@ fn remove_first_p(name: &String) -> (String, String) {
 }
 
 fn get_version_name_pos(file_name: &String) -> io::Result<usize> {
-    let mut pos = file_name.rfind_result(").")?;
+    let mut pos = match file_name.rfind_result(").") {
+        Err(_e) => { 
+                println!("Warning: There is no version in \"{}\"", file_name); 
+                let pos = file_name.rfind_result(".")?;
+                return Ok(pos);
+            },
+        Ok(x) => x,
+    };
     let mut slice;
     let mut count = 1;
     loop {

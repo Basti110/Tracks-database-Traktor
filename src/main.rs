@@ -26,18 +26,18 @@ use regex::Regex;
 
 //Const Settings
 //const GENERATE_DATA: bool = false;
-const TRACK_LIST_PATH: &str = "src/files/tracks-sample-mini.txt";
+const TRACK_LIST_PATH: &str = "src/files/tracks-sample.txt";
 const FILE_DIR: &str = "files-mini/";
-const MAX_FILE_NAME_LEN: usize = 55;
+const MAX_FILE_NAME_LEN: usize = 80;
 
 fn main() -> io::Result<()> {
 
     println!("|--- Delete files");
     fs::remove_dir_all(FILE_DIR)?;
-    fs::remove_file("src/files/tracks-mini-2.org")?;
-    fs::remove_file("src/files/collection-mini-2.nml")?;
-    fs::copy("src/files/tracks-mini.org", "src/files/tracks-mini-2.org")?;
-    fs::copy("src/files/collection-mini.nml", "src/files/collection-mini-2.nml")?;
+    fs::remove_file("src/files/tracks-2.org")?;
+    fs::remove_file("src/files/collection-2.nml")?;
+    fs::copy("src/files/tracks.org", "src/files/tracks-2.org")?;
+    fs::copy("src/files/collection.nml", "src/files/collection-2.nml")?;
     println!("---| Delete files");
 
     let matches = App::new("Tracks-database-Traktor")
@@ -83,7 +83,7 @@ fn main() -> io::Result<()> {
     
     println!("|--- start Manager");
     let now = Instant::now();
-    let mut manager = match Manager::new(&"src/files/tracks-mini-2.org".to_string(), &"src/files/collection-mini-2.nml".to_string(), max_len) {
+    let mut manager = match Manager::new(&"src/files/tracks-2.org".to_string(), &"src/files/collection-2.nml".to_string(), max_len) {
         Some(x) => x,
         None => return Err(Error::new(ErrorKind::InvalidData, "Can not Start manager")),
     };

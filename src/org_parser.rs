@@ -163,6 +163,9 @@ impl OrgList {
                 line.drain(..3);
                 line.pop();
                 entry.name = line.clone();
+                if line.find("\r").is_some() || line.find("\n").is_some() {
+                    line.pop();
+                }
                 println!("Name new: {} : {}", line, line.len());
                 loop {
                     line = "".to_string();
